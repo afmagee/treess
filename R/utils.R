@@ -44,14 +44,16 @@ as.RFcoords <- function(trees) {
 #'
 #' Calculates unrooted RF distance between a set of trees.
 #'
-#' @param trees list of trees or multiPhylo object.
+#' @param coords matrix of trees as coordinates, as.RFcoords(trees)$coords.
 #' @return Distances as an object of class dist.
-#' @details Unlike phangorn::RF.dist, does not offer rooted RF distances of warn when unrooting trees.
 #' @export
-fastRF <- function(trees) {
-  coords <- trees2Coords(trees)
+RF.from.coords <- function(coords) {
+  if ( (length(dim(coords)) !=2) || any(!(as.numeric(coords) %in% c(0,1))) ) {
+    stop("Input must be coordinate matrix")
+  }
   return(dist(coords,method="manhattan"))
 }
+
 
 #' KL divergence
 #' 

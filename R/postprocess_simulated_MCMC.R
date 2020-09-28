@@ -220,70 +220,47 @@ treeProbSquaredError <- function(simulated.samples,dmat=NULL) {
   return(squared_errors)
 }
 
-MRC <- function(trees,probs) {
-  # recover()
-  
-  ntrees <- length(trees)
-  taxa <- trees[[1]]$tip.label
-  ntax <- length(taxa)
-  
-  # Get master list of all splits
-  all_splits <- as.matrix(phangorn::as.splits(trees))
-  
-  # Order taxa alphabetically
-  all_splits <- all_splits[,order(colnames(all_splits))]
-  
-  # Remove trivial splits
-  trivial <- rowSums(all_splits) == 1 | rowSums(all_splits) == ntax
-  
-  all_splits <- all_splits[!trivial,]
-  
-  # Polarize, our rule here is that sort(taxa)[1] must be in the split
-  to_polarize <- all_splits[,1] != 1
-  
-  all_splits[to_polarize,] <- -1 * (all_splits[to_polarize,] - 1)
-  
-  # Collapse to strings
-  all_splits <- apply(all_splits,1,paste0,collapse="")
-  
+# Calculates the MRC tree from an RF coordinate matrix and the probabilities of the trees in the matrix
+# Returns a vector of the splits in the MRC tree
+MRC.from.coords <- function(coords,probs=rep(1/dim(coords)[1],dim(coords)[1])) {
+  if ( sum(probs) != 1) {
+    probs <- probs/sum(probs)
+  }
+  split_probs <- colSums(coords * probs)
+  return(as.numeric(split_probs > 0.5 ))
 }
+
 
 # Calculates d(MRC(posterior samples),MRC(true posterior)) for an object of class simulatedPosterior, where MRC(trees) is the MRC for those trees
 # The distance measure is either RF distance or SPR distance
-distanceToTrueMRC <- function(simulated.samples,tree.dist=c("RF","SPR"),...) {
+distanceToTrueMRC <- function(simulated.samples,coords,tree.dist=c("RF","SPR")) {
   # recover()
   
-  # ntrees <- length(simulated.samples$trees)
-  # nchains <- dim(simulated.samples$indices)[2]
-  # 
-  # if ( length(true_summary_index) > 1 ) {
-  #   warning("There is no unique true summary tree for the true posterior, taking first.")
-  #   true_summary_index <- true_summary_index[1]
-  # }
-  # true_summary <- simulated.samples$trees[[true_summary_index]]
-  # 
-  # estimated_summary_indices <- sapply(1:nchains,function(j){
-  #   est_probs <- sapply(1:ntrees,function(i){sum(simulated.samples$indices[,j] == i,na.rm=TRUE)})
-  #   est_probs <- est_probs/sum(est_probs)
-  #   idx <- summaryTreeIndex(dmat,est_probs,summary=summary)
-  #   if ( length(idx) > 1 ) {
-  #     warning(paste0("There is no unique true summary tree for chain ",j,", taking first."))
-  #     idx <- idx[1]
-  #   }
-  #   return(idx)
-  # })
-  # 
-  # d <- numeric(nchains)
-  # if ( tolower(tree.dist) == "rf" ) {
-  #   d <- phangorn::RF.dist(simulated.samples$trees[estimated_summary_indices],true_summary)
-  # } else if ( tolower(tree.dist) == "spr" ) {
-  #   d <- phangorn::SPR.dist(simulated.samples$trees[estimated_summary_indices],true_summary)
-  # } else {
-  #   stop("Invalid tree distance metric.")
-  # }
-  # 
-  # return(d)
-  return(-Inf)
+  ntrees <- length(simulated.samples$trees)
+  nchains <- dim(simulated.samples$indices)[2]
+  
+    all_mrc <- t(sapply(1:nchains,function(j){
+      indices <- simulated.samples$indices[,j]
+      indices <- indices[!is.na(indices)]
+      probs <- sapply(1:ntrees,function(i){
+        sum(indices == i)
+      })/length(indices)
+      MRC.from.coords(coords,probs)
+    }))
+    true_mrc <- MRC.from.coords(coords,simulated.samples$probs)
+    
+    if ( tree.dist == "RF" ) {
+      all_dists <- dist(rbind(true_mrc,all_mrc),method="manhattan")  
+      return(all_dists[1:nchains])
+    } else {
+      stop("Cannot compute distanceToTrueMRC for option SPR")
+      true_mrc <- coords2tree(true_mrc)
+      all_dists <- sapply(1:nchains,function(j){
+        this_mrc <- coords2tree(all_mrc[j,])
+        return(phangorn::SPR.dist(this_mrc,true_mrc))
+      })
+      return(all_dists)
+    }
 }
 
 # Computes the expected average squared pairwise distance given a distance matrix and tree probabilities

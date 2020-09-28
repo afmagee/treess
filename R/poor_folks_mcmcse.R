@@ -23,7 +23,7 @@ treeStability <- function(trees,stat,consensus.threshold=c(0.5,0.75,0.95),nrep=1
 #' @param trees The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords (only usable with stat="ASDSF|MRC")
 #' @param stat The summary to be plotted. ASDSF vizualizes convergence of split frequencies, MRC of the summary tree(s), topoProbs of the tree probabilities, imbalance of the tree (im)balance.
 #' @param sizes Either an integer giving the number of points to compute the stability (at least 3 and no more than the number of trees), or the sample sizes at which the stability should be computed.
-#' @param consensus.threshold The consensus tree will contain only splits above this probability (p >= 0.5). Can be a vector of probabilities.
+#' @param consensus.threshold The consensus tree will contain only splits above this probability (p > 0.5). Can be a vector of probabilities.
 #' @param nrep The number of (bootstrap) replicates used to assess the consensus tree stability.
 #' @param probs The quantiles in the results summary.
 #' @param spacing Options "linear|logarithmic". When determining the sequence of sizes (sizes given as an integer), should they be linearly or logarithmically spaced?
@@ -44,8 +44,8 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
     stop("Unrecognized option to argument \"stat\".")
   }
   
-  if ( any(consensus.threshold < 0.5) ) {
-    stop("Argument \"consensus.threshold\" must be >= 0.5.")
+  if ( any(consensus.threshold <= 0.5) ) {
+    stop("Argument \"consensus.threshold\" must be > 0.5.")
   }
   
   if ( "matrix" %in% class(trees) && stat == "IMBALANCE" ) {
@@ -131,7 +131,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
     best_imbalance <- NA
     best_split_probs <- colMeans(coords[1:nsamps,])
     best_con_splits <- lapply(consensus.threshold,function(thresh) {
-      best_split_probs >= thresh
+      best_split_probs > thresh
     })
     if ( stat == "TOPOPROBS" ) {
       best_topo_probs <- sapply(1:n_unique_topologies,function(i){
@@ -164,7 +164,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
       } else if ( stat == "MRC" ) {
         dists <- sapply(1:length(consensus.threshold),function(j) {
           thresh <- consensus.threshold[j]
-          con_splits <- split_probs >= thresh
+          con_splits <- split_probs > thresh
           sum(con_splits) + sum(best_con_splits[[j]]) - 2*sum(con_splits & best_con_splits[[j]])
         })
       } else if (stat == "TOPOPROBS" ) {
