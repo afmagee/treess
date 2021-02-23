@@ -1,3 +1,45 @@
+#' Finds t0 for a piecewise constant curve by linear interpolation.
+#'
+#' @param x The time lags at which measurements are taken (MUST INCLUDE 0!)
+#' @param y The measurement associate with each x that we are using for to compute the ESS.
+#' @param y.crit The critical value above (or below) which independence is achieved.
+#' @param above.or.below Is t0 the time at which y >= y.crit ("above") or y <= y.crit ("below")?
+#' @keywords internal
+findt0Smoothed <- function(x,y,y.crit,above.or.below) {
+  if ( (!x[1] == 0 && length(x) == length(y)) ) {
+    stop("findt0Smoothed requires x[1] = 0 and length(x) = length(y)")
+  }
+  if ( above.or.below == "below" ) {
+    y <- -y
+    y.crit <- -y.crit
+  } else if ( above.or.below != "above" ) {
+    stop("Unrecognized option to findt0Smoothed.")
+  }
+  
+  # de-duplicate entries
+  n <- length(y)
+  if ( (any(y[-1] == y[-n])) ) {
+    first <- match(unique(y),y)
+    x <- x[first]
+    y <- y[first]
+  }
+  
+  first_larger <- min(which(y >= y.crit))
+  
+  if (first_larger == 1) {
+    stop("t0 cannot be negative")
+  }
+  
+  x2 <- x[first_larger]
+  x1 <- x[first_larger-1]
+  y2 <- y[first_larger]
+  y1 <- y[first_larger-1]
+  slope <- (y2 - y1)/(x2 - x1)
+  thin <- x1 + (y.crit - y1)/slope
+  
+  return(thin)
+}
+
 #' Reads a MrBayes .trprobs file
 #'
 #' @param filepath Filepath to MrBayes .trprobs file

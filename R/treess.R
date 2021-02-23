@@ -1,6 +1,6 @@
 #' Lists all available methods for computing the ESS of trees/multivariate objects.
 #'
-#' @param reccomended If TRUE, just returns list of the best-performing methods.
+#' @param recomended If TRUE, just returns list of the best-performing methods.
 #' @export
 #' @examples
 #' getESSMethods()
