@@ -42,20 +42,3 @@ dCovESS <- function(dmat,trees=NA,min.nsamples=5,nsim=1000,alpha=0.05,bootstrap=
   return(n/thin)
   
 }
-
-# # Computes ESS by finding the time lag at which the distance covariance is not distinguishable from 0
-# # Uses the energy package implementation which is written in C for speed
-# dCovTestESS <- function(dmat,trees=NA,min.nsamples=5,nsim=200,alpha=0.05) {
-#   n <- dim(dmat)[1]
-#   
-#   thin <- n
-#   for (i in 1:(n-min.nsamples)) {
-#     p <- energy::dcov.test(dmat[-c(1:i),-c(1:i)],dmat[-c((n-i+1):n),-c((n-i+1):n)],index=1.0,R=nsim)$p.value
-#     if ( p >= alpha ) {
-#       thin <- i
-#       break
-#     }
-#   }
-#   return(n/thin)
-# }
-# 

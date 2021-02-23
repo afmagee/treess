@@ -53,33 +53,3 @@ approximateESS <- function(dmat,trees=NA,nsim=NA,min.nsamples=5,alpha=0.05) {
   
   return(ess)
 }
-
-# # Computes an ESS by comparing the observed variance of estimators of the average pairwise distance to CLT-based asymptotics
-# CLTESS <- function(dmat,min.nsamples=5,alpha=NA,nsim=NA) {
-#   # recover()
-#   
-#   dmat <- dmat^2
-#   
-#   n <- dim(dmat)[1]
-#   
-#   # turn minimum number of samples into the maximum off-diagonal
-#   max_off_diag <- n-min.nsamples
-#   
-#   # estimate average squared distance for each time lag with at least min.nsamples samples
-#   t <- 1:max_off_diag
-#   d_t <- sapply(t,function(t_){
-#     mean(dmat[row(dmat) == col(dmat) + t_])
-#   })
-#   
-#   # estimate mean and variance of squared distances were trees sampled independently
-#   iid_moments <- estimateTreeTopologicalDistanceMoments(dmat,squared=TRUE)
-#   
-#   # transform d_t s.t. asymptotically the distribution is Normal(0,sig^2)
-#   transformed <- (d_t - iid_moments[1]) * sqrt(n - t)
-#   
-#   # observed variance (expected variance under iid sampling is iid_moments[2])
-#   var_obs <- var(transformed)
-#   
-#   return(n * iid_moments[2]/var_obs)
-# }
-# 
