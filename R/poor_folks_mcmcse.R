@@ -1,8 +1,11 @@
 #' Stability of MCMC estimates from trees.
 #'
-#' For some split probability threshold(s), examines stability of the consensus tree from a sample of trees.
+#' Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.
+#' Summaries include ASDSF, tree imbalance, tree probabilities, and the MRC tree.
+#' This function can be slow with large samples of trees due to the initial cost of computing the distance matrix of all trees.
 #'
 #' @param trees The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords.
+#' @param stat The summary to be plotted. ASDSF vizualizes convergence of split frequencies, MRC of the summary tree(s), topoProbs of the tree probabilities, imbalance of the tree (im)balance.
 #' @param consensus.threshold The consensus tree will contain only splits above this probability (p >= 0.5). Can be a vector of probabilities.
 #' @param nrep The number of (bootstrap) replicates used to assess the consensus tree stability.
 #' @param tree.probs Trees are taken to be equal in probability (e.g. posterior samples) unless this argument specifies non-uniform probabilities.
@@ -18,7 +21,10 @@ treeStability <- function(trees,stat,consensus.threshold=c(0.5,0.75,0.95),nrep=1
   return(cts)
 }
 
-#' For some split probability threshold(s), examines stability of the consensus tree from a sample of trees over the length of the run.
+#' Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.
+#' By performing this resampling at a variety of chain lengths, provides information about how estimates have converged over the run.
+#' Summaries include ASDSF, tree imbalance, tree probabilities, and the MRC tree.
+#' This function can be slow with large samples of trees due to the initial cost of computing the distance matrix of all trees.
 #'
 #' @param trees The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords (only usable with stat="ASDSF|MRC")
 #' @param stat The summary to be plotted. ASDSF vizualizes convergence of split frequencies, MRC of the summary tree(s), topoProbs of the tree probabilities, imbalance of the tree (im)balance.
@@ -40,7 +46,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
   # recover()
   stat <- toupper(stat)
   
-  if ( !(stat %in% c("ASDSF","IMBALANCE","MRC","TOPOPROBS","RFFRECHETVAR")) ) {
+  if ( !(stat %in% c("ASDSF","IMBALANCE","MRC","TOPOPROBS","FRECHETVAR")) ) {
     stop("Unrecognized option to argument \"stat\".")
   }
   
@@ -61,6 +67,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
   } else {
     stop("Argument \"trees\" must either be a multiPhylo or an RF coordinate matrix.")
   }
+  
   ntrees <- dim(coords)[1]
   nsplits <- dim(coords)[2]
   n_unique_topologies <- NA
@@ -70,7 +77,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
     all_imbalance <- unlist(lapply(trees,unrootedImbalance))
   }
   
-  use.dmat <- stat == "TOPOPROBS" || stat == "RFFRECHETVAR"
+  use.dmat <- stat == "TOPOPROBS" || stat == "FRECHETVAR"
   tree_indices <- c()
   rf_dmat <- matrix()
   if ( use.dmat ) {
@@ -138,7 +145,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
         sum(tree_indices[1:nsamps] == i)/nsamps
       })
     }
-    if ( stat == "RFFRECHETVAR") {
+    if ( stat == "FRECHETVAR") {
       stop("not implemented")
     }
     if ( stat == "IMBALANCE" ) {
@@ -174,7 +181,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
         dists <- KL(topo_probs,best_topo_probs)
       } else if ( stat == "IMBALANCE" ) {
         dists <- (mean(all_imbalance[idx]) - best_imbalance)^2
-      } else if ( stat == "RFFRECHETVAR" ) {
+      } else if ( stat == "FRECHETVAR" ) {
         
       }
       return(dists)

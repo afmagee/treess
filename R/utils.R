@@ -229,6 +229,142 @@ trees2Coords <- function(trees,namesplits=FALSE) {
       paste0(taxa[as.logical(x)],collapse=";")
     })
   }
+  # all_splits <- apply(all_splits,1,paste0,collapse="")
+  # This is faster. I don't know why, but it is
+  all_splits <- apply(all_splits,1,function(x){paste0(as.raw(x),collapse="")})
+  
+  coords <- matrix(0,nrow=length(trees),ncol=length(all_splits))
+  
+  for (i in 1:length(trees)) {
+    these_splits <- as.matrix(phangorn::as.splits(trees[[i]]))
+    
+    # alphabetize
+    these_splits <- these_splits[,order(colnames(these_splits))]
+    
+    # remove trivial splits (only one taxon or all taxa)
+    trivial <- rowSums(these_splits) == 1 | rowSums(these_splits) == ntax  | rowSums(these_splits) == (ntax - 1)
+    
+    these_splits <- these_splits[!trivial,]
+    
+    # Polarize, our rule here is that splits should be <= 50% 1s, and if 50% the first element should be a 0
+    to_polarize <- these_splits[,1] == 0
+    
+    these_splits[to_polarize,] <- -1 * (these_splits[to_polarize,] - 1)
+    
+    # these_splits <- apply(these_splits,1,paste0,collapse="")
+    # This is faster. I don't know why, but it is
+    these_splits <- apply(these_splits,1,function(x){paste0(as.raw(x),collapse="")})
+    
+    # seen <- all_splits %in% these_splits
+    
+    coords[i,all_splits %in% these_splits] <- 1
+    
+  }
+  
+  if ( namesplits ) {
+    colnames(coords) <- split_names
+  }
+  
+  return(coords)
+  
+}
+
+
+#######
+# everything under here needs to be cleaned up if it is to be included, and whether or not to export needs to be decided
+#######
+
+
+fast.trees2Coords <- function(trees,namesplits=FALSE) {
+  # recover()
+  
+  ntrees <- length(trees)
+  a <- floor(sqrt(ntrees))
+  b <- ceiling(ntrees/a)
+  
+  coord_batches <- lapply(1:a,function(i) {
+    start <- b*(i-1)+1
+    end <- i*b
+    if ( end > ntrees ) {
+      end <- ntrees
+    }
+    internal.trees2Coords(trees[start:end],namesplits=TRUE)
+  })
+  
+  all_names <- sort(unique(unlist(lapply(coord_batches,function(x){colnames(x)}))))
+  
+  # coords <- coord_batches[[1]]
+  # for (i in 2:a) {
+  #   coords <- merge(coords,coord_batches[[i]],all.x=TRUE,all.y=TRUE)
+  # }
+  
+  # system.time({
+  # coords <- matrix(0,nrow=ntrees,ncol=length(all_names))
+  # blank <- matrix(0,nrow=b,ncol=length(all_names))
+  # colnames(blank) <- all_names
+  # for (i in 1:a) {
+  #   start <- b*(i-1)+1
+  #   end <- i*b
+  #   tmp <- blank
+  #   if ( end > ntrees ) {
+  #     end <- ntrees
+  #     tmp <- tmp[1:dim(coord_batches[[i]])[1],]
+  #   }
+  #   tmp[,match(colnames(coord_batches[[i]]),all_names)] <- coord_batches[[i]]
+  #   coords[start:end,] <- tmp
+  #   # coord_batches[[i]] <- tmp
+  # }
+  # })
+  
+  coords <- matrix(0,nrow=ntrees,ncol=length(all_names))
+  for (i in 1:a) {
+    start <- b*(i-1)+1
+    end <- i*b
+    if ( end > ntrees ) {
+      end <- ntrees
+    }
+    coords[start:end,match(colnames(coord_batches[[i]]),all_names)] <- coord_batches[[i]]
+  }
+  
+  if ( namesplits ) {
+    colnames(coords) <- all_names
+  }
+  
+  return(coords)
+}
+
+
+internal.trees2Coords <- function(trees,namesplits=FALSE) {
+  # recover()
+  
+  taxa <- trees[[1]]$tip.label
+  
+  ntax <- length(taxa)
+  
+  # Get master list of all splits
+  all_splits <- as.matrix(phangorn::as.splits(trees))
+  
+  # Order alphabetically
+  all_splits <- all_splits[,order(colnames(all_splits))]
+  
+  # Remove trivial splits
+  trivial <- rowSums(all_splits) == 1 | rowSums(all_splits) == ntax  | rowSums(all_splits) == (ntax - 1)
+  
+  all_splits <- all_splits[!trivial,]
+  
+  # Polarize, our rule here is that all splits should include the first taxon
+  to_polarize <- all_splits[,1] == 0
+  
+  all_splits[to_polarize,] <- -1 * (all_splits[to_polarize,] - 1)
+  
+  # Collapse to strings
+  split_names <- c()
+  if ( namesplits ) {
+    taxa <- colnames(all_splits)
+    split_names <- apply(all_splits,1,function(x){
+      paste0(taxa[as.logical(x)],collapse=";")
+    })
+  }
   all_splits <- apply(all_splits,1,paste0,collapse="")
   
   coords <- matrix(0,nrow=length(trees),ncol=length(all_splits))
@@ -240,7 +376,7 @@ trees2Coords <- function(trees,namesplits=FALSE) {
     these_splits <- these_splits[,order(colnames(these_splits))]
     
     # remove trivial splits (only one taxon or all taxa)
-    trivial <- rowSums(these_splits) == 1 | rowSums(these_splits) == ntax  | rowSums(all_splits) == (ntax - 1)
+    trivial <- rowSums(these_splits) == 1 | rowSums(these_splits) == ntax  | rowSums(these_splits) == (ntax - 1)
     
     these_splits <- these_splits[!trivial,]
     
@@ -265,10 +401,6 @@ trees2Coords <- function(trees,namesplits=FALSE) {
   
 }
 
-
-#######
-# everything under here needs to be cleaned up if it is to be included, and whether or not to export needs to be decided
-#######
 
 spaceTimeRankAutocorrelationTest <- function(x,dist.fn,method=c("tau|kendall","rho|spearman")) {
   # recover()
