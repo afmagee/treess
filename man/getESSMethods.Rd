@@ -7,7 +7,7 @@
 getESSMethods(recommended = FALSE)
 }
 \arguments{
-\item{reccomended}{If TRUE, just returns list of the best-performing methods.}
+\item{recomended}{If TRUE, just returns list of the best-performing methods.}
 }
 \description{
 Lists all available methods for computing the ESS of trees/multivariate objects.
