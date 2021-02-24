@@ -2,16 +2,13 @@
 % Please edit documentation in R/bruteForceMCMCSE.R
 \name{bruteForceMCMCSE}
 \alias{bruteForceMCMCSE}
-\title{Obtains estimates of the distribution of error and variance measures from simulated phylogenetic MCMC.}
+\title{Computes quantities needed for calculating Monte Carlo error for trees.}
 \usage{
-bruteForceMCMCSE(simulated.samples, tree.dist = c("RF", "SPR"),
-  measures = c("treeProbSquaredError", "splitProbSquaredError",
-  "MRCSquaredError"))
+bruteForceMCMCSE(simulated.samples, measures = c("treeProbSquaredError",
+  "splitProbSquaredError", "MRCSquaredError"))
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}
-
-\item{tree.dist}{The distance measure for trees (RF or SPR, only one).}
 
 \item{measures}{The error or variance measure(s) (see details).}
 }
@@ -19,7 +16,7 @@ bruteForceMCMCSE(simulated.samples, tree.dist = c("RF", "SPR"),
 A named list with the distribution for each measure.
 }
 \description{
-Obtains estimates of the distribution of error and variance measures from simulated phylogenetic MCMC.
+Computes quantities needed for calculating Monte Carlo error for trees.
 }
 \examples{
 countTrees(rmtree(100,10))
