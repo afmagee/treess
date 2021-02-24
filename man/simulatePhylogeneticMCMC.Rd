@@ -2,10 +2,10 @@
 % Please edit documentation in R/simulatePhylogeneticMCMC.R
 \name{simulatePhylogeneticMCMC}
 \alias{simulatePhylogeneticMCMC}
-\title{Counts occurences of each tree in a set of trees, returns unique trees and their counts}
+\title{Takes in set of tree probabilities and an NNI adjacency graph on trees. Runs MCMC targeting the distribution on tree topologies.}
 \usage{
 simulatePhylogeneticMCMC(adjacency.graph, ngen = 1000, nchains = 100,
-  thin = 1, move.weights = c(2, 1), verbose = TRUE)
+  thin = 1, verbose = TRUE)
 }
 \arguments{
 \item{adjacency.graph}{An object of class treeAdjacencyGraph.}
@@ -16,8 +16,6 @@ simulatePhylogeneticMCMC(adjacency.graph, ngen = 1000, nchains = 100,
 
 \item{thin}{Samples will be thinned to one every thin generations.}
 
-\item{move.weights}{Relative probability at each step of each move type (NNI,SPR).}
-
 \item{verbose}{Whether to print summaries of MCMC performance.}
 }
 \value{
@@ -27,7 +25,7 @@ $probs contains the probabilities of the trees in the target posterior (adjacenc
 $indices contains a matrix of the MCMC chains as the indices of the trees at each generation, chains in columns, generations in rows.
 }
 \description{
-Counts occurences of each tree in a set of trees, returns unique trees and their counts
+Takes in set of tree probabilities and an NNI adjacency graph on trees. Runs MCMC targeting the distribution on tree topologies.
 }
 \details{
 No burnin is required, the chain is initialized from the stationary distribution.
