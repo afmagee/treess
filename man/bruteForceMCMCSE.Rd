@@ -5,8 +5,8 @@
 \title{Obtains estimates of the distribution of error and variance measures from simulated phylogenetic MCMC.}
 \usage{
 bruteForceMCMCSE(simulated.samples, tree.dist = c("RF", "SPR"),
-  measures = c("treeProbSquaredError", "treeVarianceSquaredError",
-  "splitProbSquaredError", "distanceToTrueMRC"))
+  measures = c("treeProbSquaredError", "splitProbSquaredError",
+  "MRCSquaredError"))
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}

@@ -4,16 +4,15 @@
 \alias{effectiveSizeEquivalentError}
 \title{Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.}
 \usage{
-effectiveSizeEquivalentError(simulated.samples, tree.dist = c("RF",
-  "SPR"), measures = c("treeProbSquaredError",
-  "treeVarianceSquaredError", "splitProbSquaredError",
-  "distanceToTrueMRC"), ess.methods = getESSMethods(),
-  return.ess = TRUE, verbose = TRUE)
+effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
+  measures = c("treeProbSquaredError", "splitProbSquaredError",
+  "MRCSquaredError"), ess.methods = getESSMethods(), return.ess = TRUE,
+  verbose = TRUE)
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}
 
-\item{tree.dist}{The distance measure for trees (RF or SPR, only one).}
+\item{tree.dist}{The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).}
 
 \item{measures}{The error or variance measure(s) (see details).}
 
@@ -29,4 +28,10 @@ So $CMDSESS$distanceToTrueMRC contains the distribution of RF distances to the t
 }
 \description{
 Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.
+}
+\details{
+There are three options for measuring Monte Carlo error.
+1) treeProbSquaredError, yields a vector of squared differences between the per-chain estimate of each topology probability and the average topology probability (averaged over all chains).
+2) splitProbSquaredError yields a vector of squared differences between the per-chain estimate of each split probability and the average split probability (averaged over all chains).
+3) MRCSquaredError yields a vector of squared RF distances from the MRC of each MCMC chain to the MRC obtained by pooling all chains to compute split frequencies.
 }

@@ -1,15 +1,19 @@
 #' Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.
 #'
 #' @param simulated.samples An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).
-#' @param tree.dist The distance measure for trees (RF or SPR, only one).
+#' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
 #' @param measures The error or variance measure(s) (see details).
 #' @param ess.methods The ESS calculation method(s) (see details).
 #' @param return.ess Should the returned lists include the calculated ESS for each chain? 
 #' @param verbose Should progress be printed to screen?
 #' @return The first layer are the different ess methods used, the second the performance measures.
 #' So $CMDSESS$distanceToTrueMRC contains the distribution of RF distances to the true MRC tree when drawing ESS samples IID from the true posterior (using CMDSESS for calculating ESS).
+#' @details There are three options for measuring Monte Carlo error.
+#' 1) treeProbSquaredError, yields a vector of squared differences between the per-chain estimate of each topology probability and the average topology probability (averaged over all chains).
+#' 2) splitProbSquaredError yields a vector of squared differences between the per-chain estimate of each split probability and the average split probability (averaged over all chains).
+#' 3) MRCSquaredError yields a vector of squared RF distances from the MRC of each MCMC chain to the MRC obtained by pooling all chains to compute split frequencies.
 #' @export
-effectiveSizeEquivalentError <- function(simulated.samples,tree.dist=c("RF","SPR"),measures=c("treeProbSquaredError","treeVarianceSquaredError","splitProbSquaredError","distanceToTrueMRC"),ess.methods=getESSMethods(),return.ess=TRUE,verbose=TRUE) {
+effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),return.ess=TRUE,verbose=TRUE) {
   # recover()
   
   if ( !("simulatedPosterior" %in% class(simulated.samples) )) {
@@ -81,7 +85,7 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist=c("RF","SPR
   }
   res <- lapply(iid_samples,function(iid) {
     these_measures <- lapply(measures,function(this_measure) {
-      eval(call(this_measure,simulated.samples=iid,dmat=dmat))
+      eval(call(this_measure,simulated.samples=iid))
     })
     names(these_measures) <- measures
     return(these_measures)

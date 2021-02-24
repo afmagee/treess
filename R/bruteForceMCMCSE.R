@@ -7,7 +7,9 @@
 #' @export
 #' @examples
 #' countTrees(rmtree(100,10))
-bruteForceMCMCSE <- function(simulated.samples,tree.dist=c("RF","SPR"),measures=c("treeProbSquaredError","treeVarianceSquaredError","splitProbSquaredError","distanceToTrueMRC")) {
+bruteForceMCMCSE <- function(simulated.samples,tree.dist=c("RF","SPR"),measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError")) {
+  # recover()
+  
   ntrees <- length(simulated.samples$trees)
   nchains <- dim(simulated.samples$indices)[2]
   
@@ -22,7 +24,7 @@ bruteForceMCMCSE <- function(simulated.samples,tree.dist=c("RF","SPR"),measures=
   }
   
   res <- lapply(measures,function(this_measure) {
-    eval(call(this_measure,simulated.samples=simulated.samples,dmat=dmat))
+    eval(call(this_measure,simulated.samples=simulated.samples))
   })
   names(res) <- measures
   return(res)
