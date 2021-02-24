@@ -14,15 +14,13 @@ permuteDistanceMatrix <- function(dmat,bootstrap=FALSE) {
   
   new_indices <- sample.int(n,n,replace=bootstrap)
   
-  tmp <- dmat
+  tmp <- matrix(0,n,n)
   for (i in 1:(n-1)) {
     for (j in (i+1):n) {
-      tmp[new_indices[i],new_indices[j]] <- dmat[i,j]
+      tmp[j,i] <- tmp[i,j] <- dmat[new_indices[i],new_indices[j]]
     }
     
   }
-  newmat <- t(tmp)
-  newmat[lower.tri(newmat)] <- tmp[lower.tri(tmp)]
-  
-  return(newmat)
+
+  return(tmp)
 }
