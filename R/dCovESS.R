@@ -28,7 +28,7 @@ dCovESS <- function(dmat,trees=NA,min.nsamples=5,nsim=1000,alpha=0.05,bootstrap=
   dc[1] <- energy::dcov(dmat[1:(n-1),1:(n-1)],dmat[2:n,2:n],index=1.0)
   for (i in 2:(n-min.nsamples)) {
     dc[i] <- min(dc[i-1],energy::dcov(dmat[-c(1:i),-c(1:i)],dmat[-c((n-i+1):n),-c((n-i+1):n)],index=1.0))
-    if ( dc[i] <= threshold ) {
+    if ( dc[i] < threshold ) {
       thin <- i
       break
     }

@@ -68,13 +68,13 @@ jumpDistanceEquivalenceTestESS <- function(dmat,min.nsamples,nsim,alpha,bootstra
     lagged[i] <- ifelse(i == 1,this_lag,max(this_lag,lagged[i-1]))
     # lagged[i] <- ifelse(i == 1,this_lag,max(this_lag,lagged[i-1]))
     # early terimination to avoid unneeded computation
-    if (lagged[i] >= threshold) {
+    if (lagged[i] > threshold) {
       break
     }
   }
   
   first_larger <- sapply(threshold,function(thresh){
-    min(which(lagged >= thresh))
+    min(which(lagged > thresh))
   })
   
   thin <- numeric(length(alpha))
