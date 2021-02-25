@@ -23,20 +23,23 @@ dCovESS <- function(dmat,trees=NA,min.nsamples=5,nsim=1000,alpha=0.05,bootstrap=
   })
   threshold <- quantile(null_dist,probs=alpha)
   
-  thin <- n #guarantees if we don't find a better thinning value we set ESS = 1
-  dc <- rep(NA,n-min.nsamples)
-  dc[1] <- energy::dcov(dmat[1:(n-1),1:(n-1)],dmat[2:n,2:n],index=1.0)
-  for (i in 2:(n-min.nsamples)) {
-    dc[i] <- min(dc[i-1],energy::dcov(dmat[-c(1:i),-c(1:i)],dmat[-c((n-i+1):n),-c((n-i+1):n)],index=1.0))
-    if ( dc[i] < threshold ) {
+  # guarantees if we don't find a better thinning value we set ESS = 1
+  thin <- n 
+  dc <- rep(NA,n-min.nsamples+1)
+  # Use -dCov() such that curve is increasing (nondecreasing) instead of decreasing (nonincreasing)
+  dc[1] <- -energy::dcov(dmat[1:(n-1),1:(n-1)],dmat[2:n,2:n],index=1.0)
+  for (i in 2:(n-min.nsamples+1)) {
+    dc[i] <- max(dc[i-1],-energy::dcov(dmat[-c(1:i),-c(1:i)],dmat[-c((n-i+1):n),-c((n-i+1):n)],index=1.0))
+    if ( dc[i] > threshold ) {
       thin <- i
       break
     }
   }
   
-  if ( interpolate && thin != n ) {
+  if ( interpolate && thin != n && thin != 1 ) {
+    # interpolation assumes we have first entry at lag 0
     dc <- c(energy::dcov(dmat,dmat),dc[!is.na(dc)])
-    thin <- findt0Smoothed(x=0:(length(dc)-1),y=dc,y.crit=threshold,above.or.below="below")
+    thin <- finds0Smoothed(x=0:(length(dc)-1),y=dc,threshold)
   }
   
   return(n/thin)

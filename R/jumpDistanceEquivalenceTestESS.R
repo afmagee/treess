@@ -59,39 +59,28 @@ jumpDistanceEquivalenceTestESS <- function(dmat,min.nsamples,nsim,alpha,bootstra
   })
   threshold <- quantile(null_dist,probs=alpha)
   
+  # guarantees if we don't find a better thinning value we set ESS = 1
+  thin <- n 
   # get distances at time lags until we hit the threshold
-  lagged <- numeric(n-min.nsamples+1)
-  for (i in 1:(n-min.nsamples+1)) {
+  G_s <- rep(NA,n-min.nsamples+1)
+  G_s[1] <- central_tendency(dmat[row(dmat) == col(dmat)+1])
+  for (i in 2:(n-min.nsamples+1)) {
     # distance at this time lag
-    this_lag <- central_tendency(dmat[row(dmat) == col(dmat)+i])
-    # ensure distance by lag curve is monotonic
-    lagged[i] <- ifelse(i == 1,this_lag,max(this_lag,lagged[i-1]))
-    # lagged[i] <- ifelse(i == 1,this_lag,max(this_lag,lagged[i-1]))
+    g_s <- central_tendency(dmat[row(dmat) == col(dmat)+i])
+    G_s[i] <- max(g_s,G_s[i-1])
     # early terimination to avoid unneeded computation
-    if (lagged[i] > threshold) {
+    if (G_s[i] > threshold) {
+      thin <- i
       break
     }
   }
   
-  first_larger <- sapply(threshold,function(thresh){
-    min(which(lagged > thresh))
-  })
-  
-  thin <- numeric(length(alpha))
-  names(thin) <- paste0(alpha*100,"%")
-  for (i in 1:length(alpha)) {
-    if (interpolate && first_larger[i] > 1) {
-      x2 <- first_larger[i]
-      x1 <- x2 - 1
-      y2 <- lagged[x2]
-      y1 <- lagged[x1]
-      slope <- (y2 - y1)/(x2 - x1)
-      thin[i] <- x1 + (threshold[i] - y1)/slope
-    } else {
-      thin[i] <- first_larger[i]
-    }
+  if ( interpolate && thin != n && thin != 1 ) {
+    # interpolation assumes we have first entry at lag 0
+    G_s <- c(0,G_s[!is.na(G_s)])
+    thin <- finds0Smoothed(x=0:(length(G_s)-1),y=G_s,threshold)
   }
-  
+
   return(n/thin)
   
 }

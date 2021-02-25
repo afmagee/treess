@@ -1,32 +1,32 @@
-#' Finds t0 for a piecewise constant curve by linear interpolation.
+#' Finds s0 for a piecewise constant curve by linear interpolation.
+#' 
+#' Curve is assumed to be nondecreasing.
 #'
 #' @param x The time lags at which measurements are taken (MUST INCLUDE 0!)
 #' @param y The measurement associate with each x that we are using for to compute the ESS.
-#' @param y.crit The critical value above (or below) which independence is achieved.
-#' @param above.or.below Is t0 the time at which y >= y.crit ("above") or y <= y.crit ("below")?
+#' @param y.crit The critical value above which independence is achieved.
 #' @keywords internal
-findt0Smoothed <- function(x,y,y.crit,above.or.below) {
-  if ( (!x[1] == 0 && length(x) == length(y)) ) {
+finds0Smoothed <- function(x,y,y.crit) {
+  n <- length(y)
+  
+  if ( (!x[1] == 0 && length(x) == n) ) {
     stop("findt0Smoothed requires x[1] = 0 and length(x) = length(y)")
   }
-  if ( above.or.below == "below" ) {
-    y <- -y
-    y.crit <- -y.crit
-  } else if ( above.or.below != "above" ) {
-    stop("Unrecognized option to findt0Smoothed.")
+  if ( any(y[-1] < y[-n]) ) {
+    stop("findt0Smoothed requires nondecreasing y")
   }
   
-  # de-duplicate entries
-  n <- length(y)
+  # Find change points and remove replicate entries, track x coordinates
+  # x=(1,2,3,4,5,6),y=(1,1,1,2,2,3) -> x=(1,4,6),y=(1,2,3)
   if ( (any(y[-1] == y[-n])) ) {
     first <- match(unique(y),y)
     x <- x[first]
     y <- y[first]
   }
   
-  first_larger <- min(which(y >= y.crit))
+  first_larger <- min(which(y > y.crit))
   
-  if (first_larger == 1) {
+  if (first_larger == 0) {
     stop("t0 cannot be negative")
   }
   
