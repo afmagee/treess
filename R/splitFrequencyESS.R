@@ -21,9 +21,9 @@ splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
   mu <- colMeans(coords)
   
   # Global Frechet variance
-  sig_sq <- mean(sapply(1:n,function(i){
+  sig_sq <- sum(sapply(1:n,function(i){
     dist(rbind(mu,coords[i,]))^2
-  }))
+  }))/(n-1)
   
   # b = batch size, a = # batches
   b <- floor(n^(1/2))

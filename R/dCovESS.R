@@ -45,3 +45,19 @@ dCovESS <- function(dmat,trees=NA,min.nsamples=5,nsim=1000,alpha=0.05,bootstrap=
   return(n/thin)
   
 }
+
+# sumOfdCorESS <- function(dmat) {
+#   n <- dim(dmat)[1]
+#   cors <- sapply(1:(n-5+1),function(i){
+#     energy::bcdcor(dmat[-c(1:i),-c(1:i)],dmat[-c((n-i+1):n),-c((n-i+1):n)])
+#   })
+#   cors <- c(1,cors)
+#   for (i in 2:length(cors)) {
+#     cors[i] <- min(cors[i-1],cors[i])
+#   }
+#   cmax <- length(cors)
+#   if (any(cors < 0)) {
+#     cmax <- min(which(cors < 0)) - 1
+#   }
+#   return(n/sum(cors[1:cmax]))
+# }
