@@ -17,7 +17,7 @@ approximateESS <- function(dmat,trees=NA,nsim=NA,min.nsamples=5,alpha=0.05) {
   thresh = 1 - alpha
   
   # turn minimum number of samples into the maximum off-diagonal
-  max_off_diag <- n-min.nsamples
+  max_off_diag <- n - min.nsamples
   
   # get empirical curve of lag time t vs distance
   t <- 1:max_off_diag
@@ -33,14 +33,14 @@ approximateESS <- function(dmat,trees=NA,nsim=NA,min.nsamples=5,alpha=0.05) {
   par <- optim(c(1,1),fn,t=t,d_t=d_t)
   
   # For finding the cutoff lag
-  unscaled_E_d_t <- 1 - exp(-t/par$par[2])
+  thresh <- thresh * par$par[1]
 
   E_delta_squared_iid <- 0
   
-  if ( unscaled_E_d_t[max_off_diag] < thresh ) {
+  if ( max(d_t) < thresh ) {
     E_delta_squared_iid <- max(dmat)
   } else {
-    thin <- min(which(unscaled_E_d_t >= thresh))
+    thin <- min(which(d_t >= thresh))
     E_delta_squared_iid <- sum(unlist(lapply(thin:n,function(i){
       dmat[row(dmat) == col(dmat) + i]
     })))/choose(n-thin,2)
