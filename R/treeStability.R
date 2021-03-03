@@ -39,23 +39,17 @@ treeStability <- function(trees,stat,consensus.threshold=c(0.5,0.75,0.95),nrep=1
 #' @details Stability is assessed as the RF distance from (bootstrap) replicate consensus trees to the consensus tree from all samples. The real sample sizes taken will not be exactly those provided because of the block sizes for bootstrapping.
 #' @export
 treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.threshold=c(0.5,0.75,0.95),nrep=100,probs=c(0.05,0.5,0.95),spacing="logarithmic",min.split.freq=0.01,block.size="sqrt",...) {
-  #TODO: 
-  #      (1) finish implenting all diagnostics
-  #      (2) overhaul return to allow running all at once
-  
+  #TODO: overhaul return to allow running all at once
+
   # recover()
   stat <- toupper(stat)
   
-  if ( !(stat %in% c("ASDSF","IMBALANCE","MRC","TOPOPROBS","FRECHETVAR")) ) {
+  if ( !(stat %in% c("ASDSF","MRC","TOPOPROBS")) ) {
     stop("Unrecognized option to argument \"stat\".")
   }
   
-  if ( any(consensus.threshold <= 0.5) ) {
-    stop("Argument \"consensus.threshold\" must be > 0.5.")
-  }
-  
-  if ( "matrix" %in% class(trees) && stat == "IMBALANCE" ) {
-    stop("Argument \"trees\" must be a multiPhylo for stat=\"imbalance\".")
+  if ( any(consensus.threshold < 0.5) ) {
+    stop("Argument \"consensus.threshold\" must be >= 0.5.")
   }
   
   # Make trees coordinates
@@ -73,10 +67,8 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
   n_unique_topologies <- NA
   
   all_imbalance <- c()
-  if ( stat == "IMBALANCE" ) {
-    all_imbalance <- unlist(lapply(trees,unrootedImbalance))
-  }
   
+  # TODO: we actually never need the distance matrix...
   use.dmat <- stat == "TOPOPROBS" || stat == "FRECHETVAR"
   tree_indices <- c()
   rf_dmat <- matrix()
@@ -118,7 +110,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
   b <- floor(sqrt(sample_sizes))
   a <- floor(sample_sizes/b)
   
-  if ( block.size %% 1 == 0 ) {
+  if ( is.numeric(block.size) && block.size %% 1 == 0 ) {
     b <- rep(block.size,length(sample_sizes))
     a <- floor(sample_sizes/b)
     if ( min(a) < 2 ) {
@@ -178,11 +170,7 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
         topo_probs <- sapply(1:n_unique_topologies,function(i){
           sum(tree_indices[idx] == i)/nsamps
         })
-        dists <- KL(topo_probs,best_topo_probs)
-      } else if ( stat == "IMBALANCE" ) {
-        dists <- (mean(all_imbalance[idx]) - best_imbalance)^2
-      } else if ( stat == "FRECHETVAR" ) {
-        
+        dists <- as.numeric(dist(rbind(topo_probs,best_topo_probs)))
       }
       return(dists)
     })
@@ -195,30 +183,37 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
   })
   names(per_size) <- b*a
   class(per_size) <- "treeStability"
+  per_size$statistic <- stat
   return(per_size)
 }
 
 #' Visualizes stability of the consensus tree from a sample of trees over the length of the run.
 #'
-#' @param x Either a multiPhylo object or the output of treeStabilityConvergence.
+#' @param tree.stability.convergence Output of treeStabilityConvergence.
 #' @param colors Colors for each of the consensus thresholds for plotting. Any provided transparencies will be removed. If NA defaults are used (defaults not guaranteed to be pretty).
 #' @param CI.color.alpha Transparency value for plotting CI thresholds
 #' @param plot.median Is there a median line to be plotted? Only works if 0.5 is included in treeStabilityConvergence(probs=c(...,0.5,...)).
 #' @return Nothing, plots the diagnostic.
-#' @details If providing trees, use ... to pass arguments to consensusTreeStabilityConvergence().
+#' @details If providing trees, use ... to pass arguments to treeStabilityConvergence().
 #' @export
-plotConsensusTreeStabilityConvergence <- function(x,colors=NA,CI.color.alpha=0.5,plot.median=TRUE,...) {
+plotTreeStabilityConvergence <- function(tree.stability.convergence,colors=NA,CI.color.alpha=0.5,plot.median=TRUE,...) {
   # recover()
   
-  if ( !("treeStability" %in% class(x)) ) {
-    x <- consensusTreeStabilityConvergence(x,...)
-    
-    # Now we strip out the arguments that aren't for plotting
-    optional_args <- names(list(...))
-    non_plotting <- names(formals("consensusTreeStabilityConvergence"))
-    non_plotting <- non_plotting[non_plotting != "..."]
-    optional_args <- list(...)[!(optional_args %in% non_plotting)]
+  if ( !("treeStability" %in% class(tree.stability.convergence)) ) {
+    stop("Invalid input to argument tree.stability.convergence")
   }
+  stat <- tree.stability.convergence$statistic
+  
+  y_lab <- ""
+  if ( toupper(stat) == "MRC" ) {
+    y_lab <- "RF(boot,real)"
+  } else if ( toupper(stat) == "TOPOPROBS" ) {
+    y_lab <- "topology probability distance(boot,real)"
+  } else if ( toupper(stat) == "ASDSF" ) {
+    y_lab <- "ASDSF(boot,real)"
+  }
+  
+  x <- tree.stability.convergence[names(tree.stability.convergence) != "statistic"]
   
   # We don't need the raw values, just the quantiles
   x <- lapply(x,function(x_){x_$quantiles})
@@ -241,7 +236,7 @@ plotConsensusTreeStabilityConvergence <- function(x,colors=NA,CI.color.alpha=0.5
   sample_sizes <- as.numeric(names(x))
   
   if ( any(is.na(colors)) ) {
-    colors <-rainbow(n_thresh)
+    colors <-heat.colors(n_thresh)
   } else {
     if ( !(all(lengths(strsplit(colors,"")) %in% c(7,9)) && all(grepl("#",colors,fixed=TRUE))) ) {
       stop("Argument \"colors\" must be entirely hexadecimal color values")
@@ -267,7 +262,7 @@ plotConsensusTreeStabilityConvergence <- function(x,colors=NA,CI.color.alpha=0.5
     yl <- ylim
   }
   
-  plot(NULL,NULL,xlim=xl,ylim=yl,xlab="# iterations",ylab="RF(boot,real)",...)
+  plot(NULL,NULL,xlim=xl,ylim=yl,xlab="# samples",ylab=y_lab,...)
   xc <- c(sample_sizes,rev(sample_sizes))
   for (i in 1:n_thresh) {
     for (j in 1:n_ci) {
@@ -290,6 +285,8 @@ plotConsensusTreeStabilityConvergence <- function(x,colors=NA,CI.color.alpha=0.5
     }
   }
   
-  legend("topright",fill=solid.colors,legend=consensus_threshold,border=NA,bty="n")
-  
+  if ( !is.null(consensus_threshold) ) {
+    legend("topright",fill=solid.colors,legend=consensus_threshold,border=NA,bty="n")
+  }
+
 }

@@ -47,7 +47,7 @@ approximateESS <- function(dmat,trees=NA,nsim=NA,min.nsamples=5,alpha=0.05) {
   }
   
   # Solve for ESS 
-  rhs <- sum(dmat)/(n^2) # actually RHS/2, but the factors cancel
+  rhs <- sum(dmat)/(n^2)
   
   ess <- 1/(1 - rhs/E_delta_squared_iid)
   
