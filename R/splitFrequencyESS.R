@@ -1,7 +1,7 @@
 #' Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
 #'
 #' @param dmat For compatibility with eval and call, not used here.
-#' @param trees All trees in the MCMC chain.
+#' @param trees All trees in the MCMC chain, either as trees or as RF coordinates.
 #' @param nsim For compatibility with eval and call, not used here.
 #' @param alpha For compatibility with eval and call, not used here.
 #' @param min.nsamples For compatibility with eval and call, not used here.
@@ -10,12 +10,18 @@
 splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
   # recover()
   
-  if ( !("multiPhylo" %in% class(trees)) ) {
-    stop("Cannot compute splitFrequencyESS for non-tree input.")
+  # As this function is putely internal, we do only minimal checking that this is a coordinate matrix
+  coords <- NULL
+  n <- 0
+  if ( "matrix" %in% class(trees) && all(rowSums(trees) == sum(trees[1,])) && all(colMeans(trees) <= 1) && all(colMeans(trees) >= 0) ) {
+    coords <- trees
+    n <- dim(trees)[1]
+  } else if ( "multiPhylo" %in% class(trees) ) {
+    coords <- trees2Coords(trees)
+    n <- length(trees)
+  } else {
+    stop("Cannot compute splitFrequencyESS for input other than multiPhylo or RF coordinate matrix.")
   }
-  
-  coords <- trees2Coords(trees)
-  n <- length(trees)
   
   # Global mean
   mu <- colMeans(coords)
@@ -54,3 +60,4 @@ splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
   return(n*sig_sq/tau_sq)
   
 }
+
