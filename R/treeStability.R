@@ -193,10 +193,13 @@ treeStabilityConvergence <- function(trees,stat="MRC",sizes=10,consensus.thresho
 #' @param colors Colors for each of the consensus thresholds for plotting. Any provided transparencies will be removed. If NA defaults are used (defaults not guaranteed to be pretty).
 #' @param CI.color.alpha Transparency value for plotting CI thresholds
 #' @param plot.median Is there a median line to be plotted? Only works if 0.5 is included in treeStabilityConvergence(probs=c(...,0.5,...)).
+#' @param xlab The x-axis label.
+#' @param ylab The y-axis label, NA for defaults.
+#' @param ... Further arguments to be passed to plotting functions.
 #' @return Nothing, plots the diagnostic.
 #' @details If providing trees, use ... to pass arguments to treeStabilityConvergence().
 #' @export
-plotTreeStabilityConvergence <- function(tree.stability.convergence,colors=NA,CI.color.alpha=0.5,plot.median=TRUE,...) {
+plotTreeStabilityConvergence <- function(tree.stability.convergence,colors=NA,CI.color.alpha=0.5,plot.median=TRUE,xlab="# samples",ylab=NA,...) {
   # recover()
   
   if ( !("treeStability" %in% class(tree.stability.convergence)) ) {
@@ -204,13 +207,14 @@ plotTreeStabilityConvergence <- function(tree.stability.convergence,colors=NA,CI
   }
   stat <- tree.stability.convergence$statistic
   
-  y_lab <- ""
-  if ( toupper(stat) == "MRC" ) {
-    y_lab <- "RF(boot,real)"
-  } else if ( toupper(stat) == "TOPOPROBS" ) {
-    y_lab <- "topology probability distance(boot,real)"
-  } else if ( toupper(stat) == "ASDSF" ) {
-    y_lab <- "ASDSF(boot,real)"
+  if ( is.na(ylab) ) {
+    if ( toupper(stat) == "MRC" ) {
+      y_lab <- "RF(boot,real)"
+    } else if ( toupper(stat) == "TOPOPROBS" ) {
+      y_lab <- "topology probability distance(boot,real)"
+    } else if ( toupper(stat) == "ASDSF" ) {
+      y_lab <- "ASDSF(boot,real)"
+    }
   }
   
   x <- tree.stability.convergence[names(tree.stability.convergence) != "statistic"]
@@ -262,7 +266,7 @@ plotTreeStabilityConvergence <- function(tree.stability.convergence,colors=NA,CI
     yl <- ylim
   }
   
-  plot(NULL,NULL,xlim=xl,ylim=yl,xlab="# samples",ylab=y_lab,...)
+  plot(NULL,NULL,xlim=xl,ylim=yl,xlab=xlab,ylab=ylab,...)
   xc <- c(sample_sizes,rev(sample_sizes))
   for (i in 1:n_thresh) {
     for (j in 1:n_ci) {

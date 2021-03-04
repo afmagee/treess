@@ -5,7 +5,8 @@
 \title{Visualizes stability of the consensus tree from a sample of trees over the length of the run.}
 \usage{
 plotTreeStabilityConvergence(tree.stability.convergence, colors = NA,
-  CI.color.alpha = 0.5, plot.median = TRUE, ...)
+  CI.color.alpha = 0.5, plot.median = TRUE, xlab = "# samples",
+  ylab = NA, ...)
 }
 \arguments{
 \item{tree.stability.convergence}{Output of treeStabilityConvergence.}
@@ -15,6 +16,12 @@ plotTreeStabilityConvergence(tree.stability.convergence, colors = NA,
 \item{CI.color.alpha}{Transparency value for plotting CI thresholds}
 
 \item{plot.median}{Is there a median line to be plotted? Only works if 0.5 is included in treeStabilityConvergence(probs=c(...,0.5,...)).}
+
+\item{xlab}{The x-axis label.}
+
+\item{ylab}{The y-axis label, NA for defaults.}
+
+\item{...}{Further arguments to be passed to plotting functions.}
 }
 \value{
 Nothing, plots the diagnostic.
