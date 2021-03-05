@@ -103,7 +103,7 @@ treeStabilityConvergence <- function(trees,
   
   # Figure out target sample sizes for calculating
   sample_sizes <- c()
-  if ( hasArg("full.chain.only") && list(...)$full.chain.only == TRUE ) {
+  if ( methods::hasArg("full.chain.only") && list(...)$full.chain.only == TRUE ) {
     # This allows us to call this function once for sample_size == length(trees) in treeStability
     sample_sizes <- ntrees
   } else {
@@ -189,15 +189,15 @@ treeStabilityConvergence <- function(trees,
   if ( treess.method %in% getESSMethods() ) {
     # Check for user input of these parameters
     alpha <- 0.05
-    if ( hasArg(alpha) ) {
+    if ( methods::hasArg(alpha) ) {
       alpha <- list(...)$alpha
     }
     min.nsamples <- 5
-    if ( hasArg(alpha) ) {
+    if ( methods::hasArg(alpha) ) {
       min.nsamples <- list(...)$min.nsamples
     }
     nsim <- 1000
-    if ( hasArg(nsim) ) {
+    if ( methods::hasArg(nsim) ) {
       nsim <- list(...)$nsim
     }
     
@@ -342,7 +342,7 @@ plotTreeStabilityConvergence <- function(tree.stability.convergence,stat,colors=
   # plot range
   xl <- range(sample_sizes)
   yl <- range(unlist(x))
-  if ( hasArg("ylim") ) {
+  if ( methods::hasArg("ylim") ) {
     yl <- ylim
   }
   
