@@ -2,32 +2,33 @@
 % Please edit documentation in R/treeStability.R
 \name{treeStability}
 \alias{treeStability}
-\title{Stability of MCMC estimates from trees.}
+\title{Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.}
 \usage{
-treeStability(trees, stat, consensus.threshold = c(0.5, 0.75, 0.95),
-  nrep = 100, probs = c(0.05, 0.5, 0.95), block.size = "sqrt")
+treeStability(trees, consensus.threshold = c(0.5, 0.75, 0.95),
+  nrep = 100, min.split.freq = 0.01, probs = c(0.05, 0.5, 0.95),
+  ACT = "sqrt")
 }
 \arguments{
 \item{trees}{The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords.}
 
-\item{stat}{The summary to be plotted. ASDSF vizualizes convergence of split frequencies, MRC of the summary tree(s), topoProbs of the tree probabilities, imbalance of the tree (im)balance.}
+\item{consensus.threshold}{The consensus tree will contain only splits above this probability (p > 0.5). Can be a vector of probabilities.}
 
-\item{consensus.threshold}{The consensus tree will contain only splits above this probability (p >= 0.5). Can be a vector of probabilities.}
+\item{nrep}{The number of bootstrap replicates used to assess the tree stability.}
 
-\item{nrep}{The number of (bootstrap) replicates used to assess the consensus tree stability.}
+\item{min.split.freq}{For ASDSF only. Minimum split frequency to be included in ASDSF.}
 
-\item{block.size}{Determines the block size for block bootstrapping. Option "sqrt" scales the block size as the square root of the chain length. Otherwise an integer must be specified. This could be N/ESS.}
+\item{probs}{The quantiles in the results summary.}
 
-\item{tree.probs}{Trees are taken to be equal in probability (e.g. posterior samples) unless this argument specifies non-uniform probabilities.}
+\item{ACT}{Autocorrelation time for computing the block size for bootstrapping the chain. Default ("sqrt") conservatively scales ACT with sqrt of subsample length. Can also be provided as numeric.}
 }
 \value{
-A list. $quantiles contains the quantiles specified by probs for all thresholds. $boot contains a matrix of all the bootstrapped distances.
+One element of the list returned by \link{treeStabilityConvergence}.
 }
 \description{
-Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.
-Summaries include ASDSF, tree imbalance, tree probabilities, and the MRC tree.
-This function can be slow with large samples of trees due to the initial cost of computing the distance matrix of all trees.
+This is a convenience wrapper for treeStabilityConvergence.
+It allows you to compute uncertainty about tree summaries for the full chain and only the full chain.
+For more, see \link{treeStabilityConvergence}.
 }
-\details{
-Stability is assessed as the RF distance from (bootstrap) replicate consensus trees to the consensus tree from all samples. The real sample size taken will not usually be exactly the number of trees because of the block sizes for bootstrapping.
+\seealso{
+\link{treeStabilityConvergence},\link{plotTreeStabilityConvergence}
 }

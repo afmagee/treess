@@ -10,7 +10,7 @@ splitFrequencyESS(dmat = NA, trees, min.nsamples = NA, alpha = NA,
 \arguments{
 \item{dmat}{For compatibility with eval and call, not used here.}
 
-\item{trees}{All trees in the MCMC chain.}
+\item{trees}{All trees in the MCMC chain, either as trees or as RF coordinates.}
 
 \item{min.nsamples}{For compatibility with eval and call, not used here.}
 

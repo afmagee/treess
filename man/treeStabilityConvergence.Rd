@@ -2,44 +2,64 @@
 % Please edit documentation in R/treeStability.R
 \name{treeStabilityConvergence}
 \alias{treeStabilityConvergence}
-\title{Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.
-By performing this resampling at a variety of chain lengths, provides information about how estimates have converged over the run.
-Summaries include ASDSF, tree imbalance, tree probabilities, and the MRC tree.
-This function can be slow with large samples of trees due to the initial cost of computing the distance matrix of all trees.}
+\title{Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.}
 \usage{
-treeStabilityConvergence(trees, stat = "MRC", sizes = 10,
-  consensus.threshold = c(0.5, 0.75, 0.95), nrep = 100,
-  probs = c(0.05, 0.5, 0.95), spacing = "logarithmic",
-  min.split.freq = 0.01, block.size = "sqrt", ...)
+treeStabilityConvergence(trees, nsizes = 10, nrep = 100,
+  probs = c(0.05, 0.5, 0.95), consensus.threshold = c(0.5, 0.75, 0.95),
+  ACT = "sqrt", spacing = "logarithmic", min.split.freq = 0.01,
+  treess.method = "none", ...)
 }
 \arguments{
-\item{trees}{The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords (only usable with stat="ASDSF|MRC")}
+\item{trees}{The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords.}
 
-\item{stat}{The summary to be plotted. ASDSF vizualizes convergence of split frequencies, MRC of the summary tree(s), topoProbs of the tree probabilities, imbalance of the tree (im)balance.}
+\item{nsizes}{The number of points to compute the stability, the number of chain subsample lengths.}
 
-\item{sizes}{Either an integer giving the number of points to compute the stability (at least 3 and no more than the number of trees), or the sample sizes at which the stability should be computed.}
-
-\item{consensus.threshold}{The consensus tree will contain only splits above this probability (p > 0.5). Can be a vector of probabilities.}
-
-\item{nrep}{The number of (bootstrap) replicates used to assess the consensus tree stability.}
+\item{nrep}{The number of bootstrap replicates used to assess the tree stability at each chain subsample length.}
 
 \item{probs}{The quantiles in the results summary.}
 
-\item{spacing}{Options "linear|logarithmic". When determining the sequence of sizes (sizes given as an integer), should they be linearly or logarithmically spaced?}
+\item{consensus.threshold}{The consensus tree will contain only splits above this probability (p > 0.5). Can be a vector of probabilities.}
+
+\item{ACT}{Autocorrelation time for computing the block size for bootstrapping the chain. Default ("sqrt") conservatively scales ACT with sqrt of subsample length. Can also be provided as numeric.}
+
+\item{spacing}{Options "linear|logarithmic". When determining the chain subsample sizes, should they be spaced linearly or logarithmically?}
 
 \item{min.split.freq}{For ASDSF only. Minimum split frequency to be included in ASDSF.}
 
-\item{block.size}{Determines the block size for block bootstrapping. Option "sqrt" scales the block size as the square root of the chain length. Otherwise an integer must be specified, this is not advised unless only evaluating at the full chain.}
+\item{treess.method}{If treess.method is an option in getESSMethods(), for each block size we compute its treess. Default ("none") is to not compute treess to save time. Only one measure may be supplied.}
 }
 \value{
-An object of class conTreeStability (a list). For each sample size, $quantiles contains the quantiles specified by probs for all thresholds. $boot contains a matrix of all the bootstrapped distances.
+An object of class conTreeStability (a nested list). See details.
 }
 \description{
-Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.
 By performing this resampling at a variety of chain lengths, provides information about how estimates have converged over the run.
-Summaries include ASDSF, tree imbalance, tree probabilities, and the MRC tree.
-This function can be slow with large samples of trees due to the initial cost of computing the distance matrix of all trees.
+Summaries include ASDSF, tree topology probabilities, and MRC-type trees.
+This function can be slow with large samples of trees or when computing values at many subsample sizes.
 }
 \details{
-Stability is assessed as the RF distance from (bootstrap) replicate consensus trees to the consensus tree from all samples. The real sample sizes taken will not be exactly those provided because of the block sizes for bootstrapping.
+Stability is assessed by comparing summaries computed from bootstrapped samples of the Markov chain to the summary from the full sample.
+For each subsample length n, the summary is computed for trees[1:n].
+Then, nrep new chains of length n are generated via a block bootstrap, and the distance between each bootstrapped chain and the original subsampled chain are computed.
+
+The summaries are the (1) vector of split frequencies, (2) the vector of tree topology probabilities, and (3) the consensus trees at given thresholds.
+Split frequencies are compared using the ASDSF (equivalent to 1/nsplits times the Manhattan distance between the two vectors).
+Topology probabilities are compared using the Euclidean distance between the vectors.
+Consensus trees are compared using the RF distance.
+
+The real sample sizes taken will not be exactly those provided because of the block sizes for bootstrapping.
+
+When computing treess for the block sizes, the RF distance is used, rather than a user-specified option, to save on computation time.
+
+The output is a nested list.
+$using_ess records whether the ESS was calculated.
+Each other element in the list contains summaries for a given subsample length (named by the length or ESS if treess.method != "none").
+Each of these lists is a list of two matrices.
+$quantiles summarizes the chosen quantiles of the bootstrapped distances.
+$boot contains the nrep bootstrapped distance measures (replicates in rows, statistics in columns).
+$ess contains the computed treess value, if one is in fact computed.
+$chain.length records the length of the subsampled chain (which contains trees[1:chain.length]), allowing other ess measures to be computed.
+Both matrices have labels for the statistics.
+}
+\seealso{
+\link{treeStability},\link{plotTreeStabilityConvergence}
 }
