@@ -19,7 +19,9 @@ frechetCorrelationESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=5,
   
   dmat <- dmat^2
   
+  # Compute covariances only as far as we need to
   cors <- numeric(n-min.nsamples-1)
+  P <- rep(NA,floor((n-min.nsamples)/2))
   for (i in 1:(n-min.nsamples-1)) {
     rs1 <- rowSums(dmat[-c(1:i),-c(1:i)])
     rs2 <- rowSums(dmat[-c((n-i+1):n),-c((n-i+1):n)])
@@ -56,17 +58,24 @@ frechetCorrelationESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=5,
     } else {
       cors[i] <- covar/sqrt(var1*var2) 
     }
+    
+    if ( i %% 2 == 0 ) {
+      P[i/2] <- cors[i] + cors[i-1]
+      if ( P[i/2] < 0 ) {
+        break
+      }
+    } 
   }
   
-  P <- numeric(floor((n-min.nsamples)/2))
-  P[1] <- cors[1] + cors[2]
-  for (i in 2:floor((n-min.nsamples)/2)) {
+  # Smoothed P, aka P' in Vehtari et al.
+  P <- P[!is.na(P)]
+  for (i in 2:length(P)) {
     P[i] <- min(P[i-1],cors[2*i-1] + cors[2*i])
   }
   
   tau_hat <- 1
   if ( P[1] > 0 ) {
-    k <- max(which(P > 0))
+    k <- length(P)
     tau_hat <- 1 + 2 * sum(cors[1:(2*k+1)])
   }
   
