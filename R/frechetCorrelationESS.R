@@ -75,7 +75,7 @@ frechetCorrelationESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=5,
   
   tau_hat <- 1
   if ( P[1] > 0 ) {
-    k <- length(P)
+    k <- length(P) - 1
     tau_hat <- 1 + 2 * sum(cors[1:(2*k+1)])
   }
   
