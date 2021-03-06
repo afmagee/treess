@@ -16,7 +16,7 @@ getESSMethods <- function(recommended=FALSE) {
     "CMDSESS",
     # t0 ESS
     "jumpDistanceBootstrapESS",
-    "jumpDistancePermutationESS",
+    "jumpDistanceBootstrapUnsmoothedESS",
     # ESS by Frechet generalizations of 1-D metrics
     "frechetCorrelationESS",
     "splitFrequencyESS",
