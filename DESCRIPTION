@@ -6,9 +6,9 @@ Maintainer: Andrew Magee <afmagee@uw.edu>
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.4.4)
-Imports: ape, coda, phangorn, energy
+Imports: ape, coda, phangorn
 Description: Effective sample size measures and convergence tests for phylogenetic posterior distributions.
 License: GPL-3
-Suggests: knitr, igraph
+Suggests: knitr, igraph, rmutil
 VignetteBuilder: knitr
 RoxygenNote: 6.1.0
