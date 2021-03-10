@@ -4,16 +4,23 @@
 \alias{readTreeProbs}
 \title{Reads a MrBayes .trprobs file}
 \usage{
-readTreeProbs(filepath, CI.width = 1)
+readTreeProbs(filepath, CI.width = 1, type = "MrBayes", sep = "")
 }
 \arguments{
 \item{filepath}{Filepath to MrBayes .trprobs file}
 
 \item{CI.width}{All trees within the posterior CI.width*100 percentile will be returned (1.0 for all trees).}
+
+\item{type}{"MrBayes" for MrBayes-style .trprobs files, "simple" for 2-column style, see details.}
+
+\item{sep}{If type = "simple", the separator between the two columns, passed to read.table.}
 }
 \value{
-A list. $trees contains all unique topologies, and $probs their posterior probabilities
+A list. $trees contains all unique topologies, and $probs their posterior probabilities (re-normalized to sum to 1).
 }
 \description{
-Reads a MrBayes .trprobs file
+Reads in trees and their associated posterior probabilities, returns a vector of (re-normalized) probabilities and a multiPhylo object.
+}
+\details{
+Allowed input is either a MrBayes output file or a simple 2-column table, with probabilities in the first column and trees in the second.
 }
