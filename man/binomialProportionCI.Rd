@@ -13,7 +13,7 @@ binomialProportionCI(p, n, method, ci.width = 0.95)
 
 \item{method}{Jefreys|Wilson|ContinuityCorrectedWilson.}
 
-\item{ci.width}{Width of the desired confidence interval (value in [0,1]).}
+\item{ci.width}{Width of the desired confidence interval (value in [0,1]). Equivalent to 1 - 2*alpha.}
 }
 \value{
 A length(p)x2 matrix containing the lower and upper ends of the CI.

@@ -61,5 +61,5 @@ $chain.length records the length of the subsampled chain (which contains trees[1
 Both matrices have labels for the statistics.
 }
 \seealso{
-\link{treeStability},\link{plotTreeStabilityConvergence}
+\link{treeStability}, \link{plotTreeStabilityConvergence}, \link{constructTreeIntervals}
 }

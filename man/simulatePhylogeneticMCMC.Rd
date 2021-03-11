@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulatePhylogeneticMCMC.R
 \name{simulatePhylogeneticMCMC}
 \alias{simulatePhylogeneticMCMC}
-\title{Takes in set of tree probabilities and an NNI adjacency graph on trees. Runs MCMC targeting the distribution on tree topologies.}
+\title{NNI-based exploration of tree graph.}
 \usage{
 simulatePhylogeneticMCMC(adjacency.graph, ngen = 1000, nchains = 100,
   thin = 1, verbose = TRUE)
@@ -25,7 +25,8 @@ $probs contains the probabilities of the trees in the target posterior (adjacenc
 $indices contains a matrix of the MCMC chains as the indices of the trees at each generation, chains in columns, generations in rows.
 }
 \description{
-Takes in set of tree probabilities and an NNI adjacency graph on trees. Runs MCMC targeting the distribution on tree topologies.
+Takes in set of tree probabilities and an NNI adjacency graph on trees. 
+Runs MCMC targeting the distribution on tree topologies.
 }
 \details{
 No burnin is required, the chain is initialized from the stationary distribution.

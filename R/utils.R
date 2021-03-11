@@ -4,12 +4,13 @@
 #' Useful for turning estimates of the treESS into ranges of plasible split and topology probabilities from independent MCMC runs.
 #'
 #' @param p The (estimated) probability.
-#' @param n The sample size (or effective sample size).
-#' @param pi.width Width of the desired prediction interval (value in [0,1]).
+#' @param n The sample size (or effective sample size) from which the probabilities were computed.
+#' @param n.new The sample size (or effective sample size) of the new dataset for which prediction intervals are to be computed.
+#' @param pi.width Width of the desired prediction interval (value in [0,1]). Equivalent to 1 - 2*alpha.
 #' @return A length(p)x2 matrix containing the lower and upper ends of the prediction interval.
 #' @export
 #' @details Method uses a Bayesian approach and is thus most similar to method="Jeffreys" in \link{binomialProportionCI}.
-#' Predictions for proportions are computed assuming the new sample size is the same as the current sample size, and are only valid in that case.
+#' The method returns probabilities from a new sample, counts divided by the sample size.
 #' @seealso \link{binomialProportionCI}
 #' @examples
 #' 
@@ -20,7 +21,7 @@
 #' # compute CIs
 #' binomialProportionPI(x/n,n)
 
-binomialProportionPI <- function(p,n,pi.width=0.95,return.counts=FALSE) {
+binomialProportionPI <- function(p,n,n.new=n,pi.width=0.95) {
   if (!requireNamespace("rmutil",quietly=TRUE)) {
     stop("Cannot compute binomial prediction intervals without package rmutil Please install rmutil to continue.")
   }
@@ -42,12 +43,12 @@ binomialProportionPI <- function(p,n,pi.width=0.95,return.counts=FALSE) {
   m <- a/(a+b)
   s <- a+b
   
-  lb <- rmutil::qbetabinom(a_2,round(n),m,s)
-  ub <- rmutil::qbetabinom(one_minus_a_2,round(n),m,s)
+  lb <- rmutil::qbetabinom(a_2,round(n.new),m,s)
+  ub <- rmutil::qbetabinom(one_minus_a_2,round(n.new),m,s)
     
   pi <- cbind(lb,ub)
   colnames(pi) <- paste0(round(100*c(a_2,one_minus_a_2),1),"%")
-  return(pi/n)
+  return(pi/n.new)
 }
 
 #' Confidence intervals for proportions.
@@ -58,7 +59,7 @@ binomialProportionPI <- function(p,n,pi.width=0.95,return.counts=FALSE) {
 #' @param p The (estimated) probability.
 #' @param n The sample size (or effective sample size).
 #' @param method Jefreys|Wilson|ContinuityCorrectedWilson.
-#' @param ci.width Width of the desired confidence interval (value in [0,1]).
+#' @param ci.width Width of the desired confidence interval (value in [0,1]). Equivalent to 1 - 2*alpha.
 #' @return A length(p)x2 matrix containing the lower and upper ends of the CI.
 #' @export
 #' @details In practice, the Jeffreys and Wilson intervals often seem to give similar results, while the Corrected Wilson interval often gives much wider intervals.

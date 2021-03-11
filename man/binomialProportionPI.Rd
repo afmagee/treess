@@ -4,14 +4,16 @@
 \alias{binomialProportionPI}
 \title{Prediction intervals for proportions.}
 \usage{
-binomialProportionPI(p, n, pi.width = 0.95, return.counts = FALSE)
+binomialProportionPI(p, n, n.new = n, pi.width = 0.95)
 }
 \arguments{
 \item{p}{The (estimated) probability.}
 
-\item{n}{The sample size (or effective sample size).}
+\item{n}{The sample size (or effective sample size) from which the probabilities were computed.}
 
-\item{pi.width}{Width of the desired prediction interval (value in [0,1]).}
+\item{n.new}{The sample size (or effective sample size) of the new dataset for which prediction intervals are to be computed.}
+
+\item{pi.width}{Width of the desired prediction interval (value in [0,1]). Equivalent to 1 - 2*alpha.}
 }
 \value{
 A length(p)x2 matrix containing the lower and upper ends of the prediction interval.
@@ -22,7 +24,7 @@ Useful for turning estimates of the treESS into ranges of plasible split and top
 }
 \details{
 Method uses a Bayesian approach and is thus most similar to method="Jeffreys" in \link{binomialProportionCI}.
-Predictions for proportions are computed assuming the new sample size is the same as the current sample size, and are only valid in that case.
+The method returns probabilities from a new sample, counts divided by the sample size.
 }
 \examples{
 

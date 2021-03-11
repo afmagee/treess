@@ -59,7 +59,7 @@ treeStability <- function(trees,consensus.threshold=c(0.5,0.75,0.95),nrep=100,mi
 #' $ess contains the computed treess value, if one is in fact computed.
 #' $chain.length records the length of the subsampled chain (which contains trees[1:chain.length]), allowing other ess measures to be computed.
 #' Both matrices have labels for the statistics.
-#' @seealso \link{treeStability},\link{plotTreeStabilityConvergence}
+#' @seealso \link{treeStability}, \link{plotTreeStabilityConvergence}, \link{constructTreeIntervals}
 #' @export
 treeStabilityConvergence <- function(trees,
                                      nsizes=10,

@@ -1,4 +1,7 @@
-#' Takes in set of tree probabilities and an NNI adjacency graph on trees. Runs MCMC targeting the distribution on tree topologies.
+#' NNI-based exploration of tree graph.
+#' 
+#' Takes in set of tree probabilities and an NNI adjacency graph on trees. 
+#' Runs MCMC targeting the distribution on tree topologies.
 #'
 #' @param adjacency.graph An object of class treeAdjacencyGraph.
 #' @param nchains Number of (independent) MCMC chains to run.
