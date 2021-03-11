@@ -49,6 +49,11 @@ constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALS
     if ( !igraph::is_connected(graph) ) {
       # Find largest connected subset
       comp <- igraph::components(graph)
+      
+      if ( comp$no == length(trees) ) {
+        stop("All trees are disconnected.")
+      }
+      
       biggest <- which.max(comp$csize)
       
       # Prune out nonconnected trees
