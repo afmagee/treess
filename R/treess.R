@@ -37,7 +37,7 @@ fixedN <- function(dmat,trees=NULL,nsim=NA,alpha=NA,min.nsamples=NA) {
 
 #' Calculate a single effective sample size measure for a tree, or other multivariate/non-Euclidean object.
 #'
-#' @param x The tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.
+#' @param x A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.
 #' @param dist.fn A function suitable to calculate distances between all values in x.
 #' @param method The method for computing ESS (see details).
 #' @param alpha Type I error rate for methods using CIs/hypothesis tests, the proportion of the asymptote used in the approximateESS.

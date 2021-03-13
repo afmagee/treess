@@ -8,7 +8,7 @@ treess(x, dist.fn, methods = getESSMethods(), alpha = 0.05,
   nsim = 1000, min.nsamples = 5)
 }
 \arguments{
-\item{x}{The tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.}
+\item{x}{A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.}
 
 \item{dist.fn}{A function suitable to calculate distances between all values in x.}
 

@@ -122,9 +122,6 @@ binomialProportionCI <- function(p,n,method,ci.width=0.95) {
     
     # boundaries
     lb[is_0] <- 0
-    ub[is_0] <- (1 - (a/2)^(1/n))[is_0]
-    
-    lb[is_1] <- ((a/2)^(1/n))[is_1]
     ub[is_1] <- 1
   } else {
     stop("Invalid \"method\"")
