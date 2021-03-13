@@ -63,7 +63,9 @@ binomialProportionPI <- function(p,n,n.new=n,pi.width=0.95) {
 #' @return A length(p)x2 matrix containing the lower and upper ends of the CI.
 #' @export
 #' @details In practice, the Jeffreys and Wilson intervals often seem to give similar results, while the Corrected Wilson interval often gives much wider intervals.
-#' @references Newcombe (1998). "Two-sided confidence intervals for the single proportion: comparison of seven methods." Statistics in Medicine.
+#' @references 
+#' Newcombe (1998). "Two-sided confidence intervals for the single proportion: comparison of seven methods." Statistics in Medicine.
+#' Brown, Cai, and DasGupta (2001). "Interval estimation for a binomial proportion." Statistical science.
 #' @seealso \link{binomialProportionPI}
 #' @examples
 #' 

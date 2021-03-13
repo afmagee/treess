@@ -43,6 +43,7 @@ sum(x/n >= cci[,1] & x/n <= cci[,2])/length(p)
 }
 \references{
 Newcombe (1998). "Two-sided confidence intervals for the single proportion: comparison of seven methods." Statistics in Medicine.
+Brown, Cai, and DasGupta (2001). "Interval estimation for a binomial proportion." Statistical science.
 }
 \seealso{
 \link{binomialProportionPI}

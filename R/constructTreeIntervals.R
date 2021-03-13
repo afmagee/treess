@@ -97,5 +97,102 @@ constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Je
 }
 
 
-
-
+#' Plots intervals for summaries of trees.
+#' 
+#' Plots probabilities of splits or trees estimated by two independent MCMC chains, with confidence/prediction intervals.
+#'
+#' @param x Output of \link{constructTreeIntervals}.
+#' @param summary "split" to plot split probabilities, "topology" to plot topology probabilities.
+#' @param threshold If given as a numeric vector, dashed lines are drawn at these values.
+#' @param point.col Color of points.
+#' @param bar.col CIs/PIs are plotted using bar.col[1] if the intervals overlap and bar.col[2] otherwise. Default is green and red.
+#' @param log.axes If TRUE, x- and y-axes are logged. Default is FALSE for splits, TRUE for trees.
+#' @param xlab The x-axis label, NA for defaults.
+#' @param ylab The y-axis label, NA for defaults.
+#' @param main The plot title.
+#' @details Colors of cross bars show whether or not the CIs/PIs overlap, highlighting (dis)agreement between chains.
+#' Bars that cross thresholds indicate uncertainty with respect to which side of the threshold a split is on.
+#' By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.9 (relatively strong support for a split).
+#' @return Nothing, generates plot.
+#' @export
+#' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{constructTreeIntervals}
+plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.9),point.col="black",bar.col=c("springgreen4","firebrick1"),log.axes=NA,xlab=NA,ylab=NA,main=NA) {
+  # recover()
+  
+  if ( length(chains) !=2 ) {
+    stop("Must specify exactly 2 chains.")
+  }
+  
+  to.plot <- grep(summary,names(x))
+  if ( length(to.plot) != 1 ) {
+    stop("Invalid \"summary\" option.")
+  }
+  
+  do_log <- ifelse(summary == "split","","xy")
+  if ( !is.na(log.axes) ) {
+    do_log <- ifelse(log.axes,"xy","")
+  }
+  
+  if ( do_log == "xy" ) {
+    # Avoid -Inf
+    all_p <- unlist(x[[to.plot]])
+    min_val <- min(all_p[all_p > 0])
+    for (i in 1:length(x[[to.plot]])) {
+      x[[to.plot]][[i]][x[[to.plot]][[i]] == 0] <- min_val
+    }
+  }
+  
+  if ( is.na(xlab) ) {
+    xlab <- paste0("chain ",chains[1])
+  }
+  
+  if ( is.na(ylab) ) {
+    ylab <- paste0("chain ",chains[2])
+  }
+  
+  if ( is.na(main) ) {
+    main <- ifelse(grepl("split",summary),"split probabilities","topology probabilities")
+  }
+  
+  xlim <- c(0,1)
+  ylim <- c(0,1)
+  if ( grepl("topo",summary) ) {
+    xlim <- range(c(as.numeric(x$topology[[chains[1]]]),as.numeric(x$topology[[chains[2]]])))
+    ylim <- xlim
+  }
+  
+  plot(NULL,NULL,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,log=do_log)
+  abline(a=0,b=1,col="grey")
+  
+  # track whether intervals overlap (case 1) or not (case 2)
+  l1 <- x[[to.plot]][[chains[1]]][,2]
+  h1 <- x[[to.plot]][[chains[1]]][,3]
+  
+  l2 <- x[[to.plot]][[chains[2]]][,2]
+  h2 <- x[[to.plot]][[chains[2]]][,3]
+  
+  cases <- 1 + as.numeric((l1 < l2 & h1 < l2) | (l1 > h2 & h1 > h2))
+  
+  # green for intervals that overlap
+  # red otherwise
+  for (i in 1:dim(x[[to.plot]][[chains[1]]])[1]) {
+    xc <- x[[to.plot]][[chains[1]]][i,1]
+    yc <- x[[to.plot]][[chains[2]]][i,1]
+    
+    xr <- x[[to.plot]][[chains[1]]][i,2:3]
+    yr <- x[[to.plot]][[chains[2]]][i,2:3]
+    
+    lines(xr,c(yc,yc),col=bar.col[cases[i]])
+    lines(c(xc,xc),yr,col=bar.col[cases[i]])
+  }
+  
+  points(x[[to.plot]][[chains[1]]][,"point.est"],x[[to.plot]][[chains[2]]][,"point.est"],col=point.col,pch=16)
+  
+  if ( is.numeric(threshold) ) {
+    abline(h=threshold,col="grey",lty=2)
+    abline(v=threshold,col="grey",lty=2)
+  }
+  
+  
+  
+}
