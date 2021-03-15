@@ -104,19 +104,20 @@ constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Je
 #' @param x Output of \link{constructTreeIntervals}.
 #' @param summary "split" to plot split probabilities, "topology" to plot topology probabilities.
 #' @param threshold If given as a numeric vector, dashed lines are drawn at these values.
-#' @param point.col Color of points.
 #' @param bar.col CIs/PIs are plotted using bar.col[1] if the intervals overlap and bar.col[2] otherwise. Default is green and red.
+#' @param point.col Color of points, default is same as bar color. It is possible to specify a single color.
+#' @param bad.only If TRUE, CIs/PIs are only plotted for non-overlapping intervals (bar.col[2]) to highlight chain-chain mismatches.
 #' @param log.axes If TRUE, x- and y-axes are logged. Default is FALSE for splits, TRUE for trees.
 #' @param xlab The x-axis label, NA for defaults.
 #' @param ylab The y-axis label, NA for defaults.
 #' @param main The plot title.
 #' @details Colors of cross bars show whether or not the CIs/PIs overlap, highlighting (dis)agreement between chains.
 #' Bars that cross thresholds indicate uncertainty with respect to which side of the threshold a split is on.
-#' By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.9 (relatively strong support for a split).
+#' By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.95 (strong support for a split).
 #' @return Nothing, generates plot.
 #' @export
 #' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{constructTreeIntervals}
-plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.9),point.col="black",bar.col=c("springgreen4","firebrick1"),log.axes=NA,xlab=NA,ylab=NA,main=NA) {
+plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.95),bar.col=c("springgreen4","firebrick1"),point.col=bar.col,bad.only=FALSE,log.axes=NA,xlab=NA,ylab=NA,main=NA) {
   # recover()
   
   if ( length(chains) !=2 ) {
@@ -173,20 +174,29 @@ plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.9),
   
   cases <- 1 + as.numeric((l1 < l2 & h1 < l2) | (l1 > h2 & h1 > h2))
   
+  point_col <- NULL
+  if ( length(point_col) == 1 ) {
+    point_col <- rep(point.col,length(cases))
+  } else {
+    point_col <- point.col[cases]
+  }
+
   # green for intervals that overlap
   # red otherwise
   for (i in 1:dim(x[[to.plot]][[chains[1]]])[1]) {
-    xc <- x[[to.plot]][[chains[1]]][i,1]
-    yc <- x[[to.plot]][[chains[2]]][i,1]
-    
-    xr <- x[[to.plot]][[chains[1]]][i,2:3]
-    yr <- x[[to.plot]][[chains[2]]][i,2:3]
-    
-    lines(xr,c(yc,yc),col=bar.col[cases[i]])
-    lines(c(xc,xc),yr,col=bar.col[cases[i]])
+    if ( cases[i] == 2 || !bad.only ) {
+      xc <- x[[to.plot]][[chains[1]]][i,1]
+      yc <- x[[to.plot]][[chains[2]]][i,1]
+      
+      xr <- x[[to.plot]][[chains[1]]][i,2:3]
+      yr <- x[[to.plot]][[chains[2]]][i,2:3]
+      
+      lines(xr,c(yc,yc),col=bar.col[cases[i]])
+      lines(c(xc,xc),yr,col=bar.col[cases[i]])
+    }
   }
   
-  points(x[[to.plot]][[chains[1]]][,"point.est"],x[[to.plot]][[chains[2]]][,"point.est"],col=point.col,pch=16)
+  points(x[[to.plot]][[chains[1]]][,"point.est"],x[[to.plot]][[chains[2]]][,"point.est"],col=point_col,pch=16)
   
   if ( is.numeric(threshold) ) {
     abline(h=threshold,col="grey",lty=2)

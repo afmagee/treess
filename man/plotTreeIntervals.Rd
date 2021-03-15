@@ -5,8 +5,9 @@
 \title{Plots intervals for summaries of trees.}
 \usage{
 plotTreeIntervals(x, summary, chains = c(1, 2), threshold = c(0.5,
-  0.75, 0.9), point.col = "black", bar.col = c("springgreen4",
-  "firebrick1"), log.axes = NA, xlab = NA, ylab = NA, main = NA)
+  0.75, 0.95), bar.col = c("springgreen4", "firebrick1"),
+  point.col = bar.col, bad.only = FALSE, log.axes = NA, xlab = NA,
+  ylab = NA, main = NA)
 }
 \arguments{
 \item{x}{Output of \link{constructTreeIntervals}.}
@@ -15,9 +16,11 @@ plotTreeIntervals(x, summary, chains = c(1, 2), threshold = c(0.5,
 
 \item{threshold}{If given as a numeric vector, dashed lines are drawn at these values.}
 
-\item{point.col}{Color of points.}
-
 \item{bar.col}{CIs/PIs are plotted using bar.col[1] if the intervals overlap and bar.col[2] otherwise. Default is green and red.}
+
+\item{point.col}{Color of points, default is same as bar color. It is possible to specify a single color.}
+
+\item{bad.only}{If TRUE, CIs/PIs are only plotted for non-overlapping intervals (bar.col[2]) to highlight chain-chain mismatches.}
 
 \item{log.axes}{If TRUE, x- and y-axes are logged. Default is FALSE for splits, TRUE for trees.}
 
@@ -36,7 +39,7 @@ Plots probabilities of splits or trees estimated by two independent MCMC chains,
 \details{
 Colors of cross bars show whether or not the CIs/PIs overlap, highlighting (dis)agreement between chains.
 Bars that cross thresholds indicate uncertainty with respect to which side of the threshold a split is on.
-By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.9 (relatively strong support for a split).
+By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.95 (strong support for a split).
 }
 \seealso{
 \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{constructTreeIntervals}
