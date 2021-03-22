@@ -13,11 +13,11 @@ bruteForceMCMCSE(simulated.samples, measures = c("treeProbSquaredError",
 \item{measures}{The error or variance measure(s) (see details).}
 }
 \value{
-A named list with the distribution for each measure.
+A named list with the distribution for each measure. Same as a single element in \link{effectiveSizeEquivalentError}.
 }
 \description{
 Computes quantities needed for calculating Monte Carlo error for trees.
 }
-\examples{
-countTrees(rmtree(100,10))
+\seealso{
+\link{effectiveSizeEquivalentError}
 }

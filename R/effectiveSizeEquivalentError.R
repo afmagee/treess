@@ -6,12 +6,15 @@
 #' @param ess.methods The ESS calculation method(s) (see details).
 #' @param return.ess Should the returned lists include the calculated ESS for each chain? 
 #' @param verbose Should progress be printed to screen?
-#' @return The first layer are the different ess methods used, the second the performance measures.
-#' So $CMDSESS$distanceToTrueMRC contains the distribution of RF distances to the true MRC tree when drawing ESS samples IID from the true posterior (using CMDSESS for calculating ESS).
+#' @return The first layer are the different ESS methods used, the second the performance measures.
+#' So $CMDSESS$MRCSquaredError contains the distribution of RF distances to the expected MRC tree when drawing ESS samples IID from the true posterior (using CMDSESS for calculating ESS).
 #' @details There are three options for measuring Monte Carlo error.
 #' 1) treeProbSquaredError, yields a vector of squared differences between the per-chain estimate of each topology probability and the average topology probability (averaged over all chains).
 #' 2) splitProbSquaredError yields a vector of squared differences between the per-chain estimate of each split probability and the average split probability (averaged over all chains).
 #' 3) MRCSquaredError yields a vector of squared RF distances from the MRC of each MCMC chain to the MRC obtained by pooling all chains to compute split frequencies.
+#' Both (1) and (2) return matrices, with chains in columns and trees/splits in rows. Summarizing these is up to the user.
+#' The trees in treeProbSquaredError are ordered the same as they are in simulated.samples.
+#' The splits in splitProbSquaredError are ordered the same as calling as.RFcoords(simulated.samples$trees).
 #' @export
 effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),return.ess=TRUE,verbose=TRUE) {
   # recover()

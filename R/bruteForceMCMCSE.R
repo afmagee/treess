@@ -2,10 +2,9 @@
 #'
 #' @param simulated.samples An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).
 #' @param measures The error or variance measure(s) (see details).
-#' @return A named list with the distribution for each measure.
+#' @return A named list with the distribution for each measure. Same as a single element in \link{effectiveSizeEquivalentError}.
 #' @export
-#' @examples
-#' countTrees(rmtree(100,10))
+#' @seealso \link{effectiveSizeEquivalentError}
 bruteForceMCMCSE <- function(simulated.samples,measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError")) {
   # recover()
   
