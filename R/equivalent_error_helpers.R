@@ -1,5 +1,4 @@
 # Calculates (\hat{p} - E[\hat{P}])^2 for split probabilities for an object of class simulatedPosterior
-# Takes argument dmat only to allow use of call()
 splitProbSquaredError <- function(simulated.samples) {
   # recover()
   ntrees <- length(simulated.samples$trees)
@@ -19,11 +18,7 @@ splitProbSquaredError <- function(simulated.samples) {
   
   squared_errors <- (per_chain - E_hat)^2
 
-  # Splits that exist for our purposes
-  # Any split that has not been seen at least once does not count
-  is_in_samples <- rowSums(per_chain) > 0
-  
-  return(squared_errors[is_in_samples,])
+  return(squared_errors)
 }
 
 
@@ -44,11 +39,7 @@ treeProbSquaredError <- function(simulated.samples) {
   
   squared_errors <- (per_chain - E_hat)^2
   
-  # Splits that exist for our purposes
-  # Any split that has not been seen at least once does not count
-  is_in_samples <- rowSums(per_chain) > 0
-  
-  return(squared_errors[is_in_samples,])
+  return(squared_errors)
 }
 
 # Calculates d(MRC(split frequencies from this chain),MRC(pooled split frequencies from all chains)) for an object of class simulatedPosterior.
