@@ -12,6 +12,8 @@ bruteForceMCMCSE <- function(simulated.samples,measures=c("treeProbSquaredError"
   ntrees <- length(simulated.samples$trees)
   nchains <- dim(simulated.samples$indices)[2]
   
+  simulated.samples$coords <- trees2Coords(simulated.samples$trees)
+  
   res <- lapply(measures,function(this_measure) {
     eval(call(this_measure,simulated.samples=simulated.samples))
   })
