@@ -41,7 +41,7 @@ splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
     colMeans(coords[first:last,])
   }))
   
-  tau_sq_b <- b/(a-1) * sum(sapply(1:a,function(k){dist(rbind(ybar[k,],mu))}))
+  tau_sq_b <- b/(a-1) * sum(sapply(1:a,function(k){dist(rbind(ybar[k,],mu))^2}))
   
   # b = batch size, a = # batches
   b <- floor((n^(1/2))/3)
@@ -53,7 +53,7 @@ splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
     colMeans(coords[first:last,])
   }))
   
-  tau_sq_b_3 <- b/(a-1) * sum(sapply(1:a,function(k){dist(rbind(ybar[k,],mu))}))
+  tau_sq_b_3 <- b/(a-1) * sum(sapply(1:a,function(k){dist(rbind(ybar[k,],mu))^2}))
   
   tau_sq <- 2*tau_sq_b - tau_sq_b_3
   
