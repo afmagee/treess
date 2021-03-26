@@ -6,17 +6,19 @@
 \usage{
 effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
   measures = c("treeProbSquaredError", "splitProbSquaredError",
-  "MRCSquaredError"), ess.methods = getESSMethods(), return.ess = TRUE,
-  verbose = TRUE)
+  "MRCSquaredError"), ess.methods = getESSMethods(),
+  observed.trees.only = TRUE, return.ess = TRUE, verbose = TRUE)
 }
 \arguments{
-\item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}
+\item{simulated.samples}{An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).}
 
 \item{tree.dist}{The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).}
 
 \item{measures}{The error or variance measure(s) (see details).}
 
 \item{ess.methods}{The ESS calculation method(s) (see details).}
+
+\item{observed.trees.only}{If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.}
 
 \item{return.ess}{Should the returned lists include the calculated ESS for each chain?}
 
@@ -27,7 +29,8 @@ The first layer are the different ESS methods used, the second the performance m
 So $CMDSESS$MRCSquaredError contains the distribution of RF distances to the expected MRC tree when drawing ESS samples IID from the true posterior (using CMDSESS for calculating ESS).
 }
 \description{
-Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.
+For one or more ESS methods, this function loops over chains for a pseudo-MCMC run and for each chain draws round(ESS) samples iid from the posterior distribution.
+Then it computes a variety of summary measures useful for determining whether or not the ESS method works.
 }
 \details{
 There are three options for measuring Monte Carlo error.
@@ -37,4 +40,5 @@ There are three options for measuring Monte Carlo error.
 Both (1) and (2) return matrices, with chains in columns and trees/splits in rows. Summarizing these is up to the user.
 The trees in treeProbSquaredError are ordered the same as they are in simulated.samples.
 The splits in splitProbSquaredError are ordered the same as calling as.RFcoords(simulated.samples$trees).
+The option observed.trees.only is useful for comparing summaries of the Monte Carlo error between ESS iid samples and the MCMC run by guaranteeing no trees are drawn here that are not present in the MCMC chains.
 }

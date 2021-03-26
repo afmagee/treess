@@ -1,9 +1,13 @@
 #' Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.
-#'
-#' @param simulated.samples An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).
+#' 
+#' For one or more ESS methods, this function loops over chains for a pseudo-MCMC run and for each chain draws round(ESS) samples iid from the posterior distribution.
+#' Then it computes a variety of summary measures useful for determining whether or not the ESS method works.
+#' 
+#' @param simulated.samples An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).
 #' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
 #' @param measures The error or variance measure(s) (see details).
 #' @param ess.methods The ESS calculation method(s) (see details).
+#' @param observed.trees.only If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.
 #' @param return.ess Should the returned lists include the calculated ESS for each chain? 
 #' @param verbose Should progress be printed to screen?
 #' @return The first layer are the different ESS methods used, the second the performance measures.
@@ -15,8 +19,9 @@
 #' Both (1) and (2) return matrices, with chains in columns and trees/splits in rows. Summarizing these is up to the user.
 #' The trees in treeProbSquaredError are ordered the same as they are in simulated.samples.
 #' The splits in splitProbSquaredError are ordered the same as calling as.RFcoords(simulated.samples$trees).
+#' The option observed.trees.only is useful for comparing summaries of the Monte Carlo error between ESS iid samples and the MCMC run by guaranteeing no trees are drawn here that are not present in the MCMC chains.
 #' @export
-effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),return.ess=TRUE,verbose=TRUE) {
+effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),observed.trees.only=TRUE,return.ess=TRUE,verbose=TRUE) {
   # recover()
   
   if ( !("simulatedPosterior" %in% class(simulated.samples) )) {
@@ -25,6 +30,16 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   
   ntrees <- length(simulated.samples$trees)
   nchains <- dim(simulated.samples$indices)[2]
+  
+  # Restrict to sample only observed trees, if desired
+  topo_probs <- simulated.samples$probs
+  if ( observed.trees.only ) {
+    all_visited_trees <- unique(as.integer(simulated.samples$indices))
+    seen <- (1:ntrees) %in% all_visited_trees
+    unseen <- !seen
+    topo_probs[unseen] <- 0
+    topo_probs <- topo_probs/sum(topo_probs)
+  }
   
   # Start with the distance matrix for all unique topologies (allows us to reduce compute time)
   dmat <- matrix(nrow=ntrees,ncol=ntrees)
@@ -75,7 +90,7 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
     drawn_indices <- lapply(these_ess,function(n_eff){
       # Some ESS may be in [0,1], but we can't compute any measures without trees
       n_eff <- max(1,n_eff)
-      drawn <- sample.int(ntrees,n_eff,replace=TRUE,prob=iid$probs)
+      drawn <- sample.int(ntrees,n_eff,replace=TRUE,prob=topo_probs)
       if (n_eff < iid_n_samples_max) {
         drawn <- c(drawn,rep(NA,iid_n_samples_max - n_eff))
       }
