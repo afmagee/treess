@@ -4,18 +4,10 @@
 \alias{CMDSESS}
 \title{Calculates ESS for a single summary variable obtained from classical multidimensional scaling.}
 \usage{
-CMDSESS(dmat, trees = NA, nsim = NA, alpha = NA, min.nsamples = NA)
+CMDSESS(dmat, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
-
-\item{trees}{For compatibility with eval and call, not used here.}
-
-\item{nsim}{For compatibility with eval and call, not used here.}
-
-\item{alpha}{For compatibility with eval and call, not used here.}
-
-\item{min.nsamples}{For compatibility with eval and call, not used here.}
 }
 \description{
 Calculates ESS for a single summary variable obtained from classical multidimensional scaling.

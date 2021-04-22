@@ -5,19 +5,10 @@
 \title{Calculates the pseudo-ESS of Lanfear et al. (2015).
 Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the median over all possible reference trees.}
 \usage{
-medianPseudoESS(dmat, trees = NA, nsim = NA, alpha = NA,
-  min.nsamples = NA)
+medianPseudoESS(dmat, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
-
-\item{trees}{For compatibility with eval and call, not used here.}
-
-\item{nsim}{For compatibility with eval and call, not used here.}
-
-\item{alpha}{For compatibility with eval and call, not used here.}
-
-\item{min.nsamples}{For compatibility with eval and call, not used here.}
 }
 \description{
 Calculates the pseudo-ESS of Lanfear et al. (2015).

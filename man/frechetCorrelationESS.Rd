@@ -4,21 +4,20 @@
 \alias{frechetCorrelationESS}
 \title{Calculates ESS using a Frechet-like generalization of a univariate ESS based on the autocorrelation of the chain at varying timesteps.}
 \usage{
-frechetCorrelationESS(dmat, trees = NA, nsim = NA, alpha = NA,
-  min.nsamples = 5, lower.bound = TRUE)
+frechetCorrelationESS(dmat, min.nsamples = 5, lower.bound = TRUE, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
+
+\item{min.nsamples}{We only compute the correlation between x_t and x_{t+T} if there are at least this many samples.}
+
+\item{lower.bound}{Should we use the lower-bound ESS or attempt to estimated E(x_t) - E(x_{t+T})^2? Lower bound is faster.}
 
 \item{trees}{For compatibility with eval and call, not used here.}
 
 \item{nsim}{For compatibility with eval and call, not used here.}
 
 \item{alpha}{For compatibility with eval and call, not used here.}
-
-\item{min.nsamples}{We only compute the correlation between x_t and x_{t+T} if there are at least this many samples.}
-
-\item{lower.bound}{Should we use the lower-bound ESS or attempt to estimated E(x_t) - E(x_{t+T})^2? Lower bound is faster.}
 }
 \description{
 Calculates ESS using a Frechet-like generalization of a univariate ESS based on the autocorrelation of the chain at varying timesteps.

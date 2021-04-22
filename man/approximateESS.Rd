@@ -4,11 +4,13 @@
 \alias{approximateESS}
 \title{Calculates the approximate ESS of Lanfear et al. (2015).}
 \usage{
-approximateESS(dmat, min.nsamples = (dim(dmat)[1] - 100), alpha = 0.05,
+approximateESS(dmat, max.approximateESS.timelag = 100, alpha = 0.05,
   ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for chains, NOT SQUARED.}
+
+\item{max.approximateESS.timelag}{The maximum time lag for computing jump distances}
 
 \item{alpha}{The cutoff proportion of the asymptoted used to estimate the average pairwise squared distance.}
 }

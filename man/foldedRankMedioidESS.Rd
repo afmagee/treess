@@ -5,19 +5,10 @@
 \title{Calculates an ESS in the spirit of the folded rank-transformed ESS of Vehtari et al. (2019), replacing the median with the medioid.
 Where there is no unique medioid, calculates the ESS for all and returns the minimum.}
 \usage{
-foldedRankMedioidESS(dmat, trees = NA, nsim = NA, alpha = NA,
-  min.nsamples = NA)
+foldedRankMedioidESS(dmat, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
-
-\item{trees}{For compatibility with eval and call, not used here.}
-
-\item{nsim}{For compatibility with eval and call, not used here.}
-
-\item{alpha}{For compatibility with eval and call, not used here.}
-
-\item{min.nsamples}{For compatibility with eval and call, not used here.}
 }
 \description{
 Calculates an ESS in the spirit of the folded rank-transformed ESS of Vehtari et al. (2019), replacing the median with the medioid.

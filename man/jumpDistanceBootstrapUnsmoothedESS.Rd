@@ -6,19 +6,19 @@
 Uses (nonparametric) bootstrapping to compute the null distribution.
 Uses linear interpolation to smooth results.}
 \usage{
-jumpDistanceBootstrapUnsmoothedESS(dmat, trees = NA, min.nsamples = 5,
-  nsim = 1000, alpha = 0.05)
+jumpDistanceBootstrapUnsmoothedESS(dmat, min.nsamples = 5, nsim = 1000,
+  alpha = 0.05, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
-
-\item{trees}{For compatibility with eval and call, not used here.}
 
 \item{min.nsamples}{We only consider distances between x_t and x_{t+T} if there are at least this many samples.}
 
 \item{nsim}{Number of simulations (bootstraps/permutations) to compute the null distribution.}
 
 \item{alpha}{The cutoff quantile for the null distribution, above which samples are considered independent.}
+
+\item{trees}{For compatibility with eval and call, not used here.}
 
 \item{use.median:}{Whether to summarize the jump distance distribution at each time lag by the median (if TRUE), otherwise the mean is used.}
 }

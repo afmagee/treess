@@ -4,8 +4,7 @@
 \alias{totalDistanceESS}
 \title{Calculates the ESS of a transformed variable y where y[i] = sum_j(d(x[i],x[j])).}
 \usage{
-totalDistanceESS(dmat, trees = NA, nsim = NA, alpha = NA,
-  min.nsamples = NA)
+totalDistanceESS(dmat, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}

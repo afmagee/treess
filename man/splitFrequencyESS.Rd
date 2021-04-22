@@ -4,19 +4,10 @@
 \alias{splitFrequencyESS}
 \title{Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).}
 \usage{
-splitFrequencyESS(dmat = NA, trees, min.nsamples = NA, alpha = NA,
-  nsim = NA)
+splitFrequencyESS(trees, ...)
 }
 \arguments{
-\item{dmat}{For compatibility with eval and call, not used here.}
-
 \item{trees}{All trees in the MCMC chain, either as trees or as RF coordinates.}
-
-\item{min.nsamples}{For compatibility with eval and call, not used here.}
-
-\item{alpha}{For compatibility with eval and call, not used here.}
-
-\item{nsim}{For compatibility with eval and call, not used here.}
 }
 \description{
 Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
