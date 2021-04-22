@@ -89,7 +89,7 @@ treess <- function(x,dist.fn,methods=getESSMethods(),alpha=0.05,nsim=1000,min.ns
     dmat <- dmat_list[[i]]
     phy <- x[[i]]
     these_ess <- sapply(methods,function(ess_method){
-      eval(call(ess_method,dmat=dmat,trees=phy,min.nsamples=min.nsamples,alpha=alpha,nsim=nsim))
+      eval(call(ess_method,dmat=dmat,trees=phy,min.nsamples=min.nsamples,alpha=alpha,nsim=nsim,max.approximateESS.timelag=max.approximateESS.timelag))
     })
     names(these_ess) <- methods
     return(these_ess)
