@@ -7,7 +7,7 @@
 approximateESS <- function(dmat,max.approximateESS.timelag=100,alpha=0.05,...) {
   # This function essentially strings together the following RWTY functions
   # topological.autocorr, topological.approx.ess, approx.ess.multi, approx.ess.single, tree.autocorr
-  
+
   dmat <- dmat^2
   
   N <- n <- dim(dmat)[1]
@@ -15,8 +15,11 @@ approximateESS <- function(dmat,max.approximateESS.timelag=100,alpha=0.05,...) {
   # alpha to threshold
   thresh = 1 - alpha
   
-  # turn minimum number of samples into the maximum off-diagonal
-  max_off_diag <- n - min.nsamples
+  # make sure we don't over shoot
+  max_off_diag <- max.approximateESS.timelag
+  if ( max_off_diag > dim(dmat)[1]-1 ) {
+    max_off_diag <- dim(dmat)[1]-1
+  }
   
   # get empirical curve of lag time t vs distance
   # see also topological.autocorr
