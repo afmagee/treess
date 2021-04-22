@@ -161,7 +161,7 @@ finds0Smoothed <- function(x,y,y.crit) {
   
   first_larger <- min(which(y > y.crit))
   
-  if (first_larger == 0) {
+  if (x[first_larger] == 0) {
     stop("t0 cannot be negative")
   }
   

@@ -63,17 +63,23 @@ jumpDistanceEquivalenceTestESS <- function(dmat,min.nsamples,nsim,alpha,bootstra
   # get distances at time lags until we hit the threshold
   G_s <- rep(NA,n-min.nsamples+1)
   G_s[1] <- central_tendency(dmat[row(dmat) == col(dmat)+1])
-  for (i in 2:(n-min.nsamples+1)) {
-    # distance at this time lag
-    g_s <- central_tendency(dmat[row(dmat) == col(dmat)+i])
-    G_s[i] <- max(g_s,G_s[i-1])
-    # early terimination to avoid unneeded computation
-    if (G_s[i] > threshold) {
-      thin <- i
-      break
+  if ( G_s[1] > threshold ) {
+    # Check for ESS = n
+    thin <- 1
+  } else {
+    for (i in 2:(n-min.nsamples+1)) {
+      # distance at this time lag
+      g_s <- central_tendency(dmat[row(dmat) == col(dmat)+i])
+      G_s[i] <- max(g_s,G_s[i-1])
+      # early terimination to avoid unneeded computation
+      if (G_s[i] > threshold) {
+        thin <- i
+        break
+      }
     }
   }
   
+  # Only interpolate if we've got 1 < ESS < n
   if ( interpolate && thin != n && thin != 1 ) {
     # interpolation assumes we have first entry at lag 0
     G_s <- c(0,G_s[!is.na(G_s)])
