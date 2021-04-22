@@ -4,17 +4,11 @@
 \alias{approximateESS}
 \title{Calculates the approximate ESS of Lanfear et al. (2015).}
 \usage{
-approximateESS(dmat, trees = NA, nsim = NA, min.nsamples = 5,
-  alpha = 0.05)
+approximateESS(dmat, min.nsamples = (dim(dmat)[1] - 100), alpha = 0.05,
+  ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for chains, NOT SQUARED.}
-
-\item{trees}{For compatibility with eval and call, not used here.}
-
-\item{nsim}{For compatibility with eval and call, not used here.}
-
-\item{min.nsamples}{We only compute the average squared distance between x_t and x_{t+T} if there are at least this many samples.}
 
 \item{alpha}{The cutoff proportion of the asymptoted used to estimate the average pairwise squared distance.}
 }

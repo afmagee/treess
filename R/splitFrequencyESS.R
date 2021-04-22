@@ -1,13 +1,9 @@
 #' Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
 #'
-#' @param dmat For compatibility with eval and call, not used here.
 #' @param trees All trees in the MCMC chain, either as trees or as RF coordinates.
-#' @param nsim For compatibility with eval and call, not used here.
-#' @param alpha For compatibility with eval and call, not used here.
-#' @param min.nsamples For compatibility with eval and call, not used here.
 #' @references Vats, Dootika, and Christina Knudson. "Revisiting the Gelman-Rubin diagnostic." arXiv preprint arXiv:1812.09384 (2018).
 #' @keywords internal
-splitFrequencyESS <- function(dmat=NA,trees,min.nsamples=NA,alpha=NA,nsim=NA) {
+splitFrequencyESS <- function(trees,...) {
   # recover()
   
   # As this function is putely internal, we do only minimal checking that this is a coordinate matrix

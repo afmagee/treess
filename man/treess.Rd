@@ -5,7 +5,7 @@
 \title{Calculate a single effective sample size measure for a tree, or other multivariate/non-Euclidean object.}
 \usage{
 treess(x, dist.fn, methods = getESSMethods(), alpha = 0.05,
-  nsim = 1000, min.nsamples = 5)
+  nsim = 1000, min.nsamples = 5, max.approx.timelag = 100)
 }
 \arguments{
 \item{x}{A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.}
@@ -17,6 +17,8 @@ treess(x, dist.fn, methods = getESSMethods(), alpha = 0.05,
 \item{nsim}{For methods using permutation/bootstrap resampling, the number of resampling iterations.}
 
 \item{min.nsamples}{The minimum number of samples do be used in calculating summaries (median distance, correlation, etc.). Essentially the maximum time lag considered is length(chains[[i]]) - min.nsamples. Not applicable to dimension reduction methods.}
+
+\item{max.approx.timelag}{The maximum time lag considered in the approximateESS, overrides min.nsamples.}
 
 \item{method}{The method for computing ESS (see details).}
 }

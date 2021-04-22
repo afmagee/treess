@@ -1,12 +1,10 @@
 #' Calculates the approximate ESS of Lanfear et al. (2015).
 #'
 #' @param dmat Sample-to-sample distance matrix for chains, NOT SQUARED.
-#' @param trees For compatibility with eval and call, not used here.
-#' @param nsim For compatibility with eval and call, not used here.
+#' @param max.approximateESS.timelag The maximum time lag for computing jump distances
 #' @param alpha The cutoff proportion of the asymptoted used to estimate the average pairwise squared distance.
-#' @param min.nsamples We only compute the average squared distance between x_t and x_{t+T} if there are at least this many samples.
 #' @keywords internal
-approximateESS <- function(dmat,trees=NA,nsim=NA,min.nsamples=(dim(dmat)[1] - 100),alpha=0.05) {
+approximateESS <- function(dmat,max.approximateESS.timelag=100,alpha=0.05,...) {
   # This function essentially strings together the following RWTY functions
   # topological.autocorr, topological.approx.ess, approx.ess.multi, approx.ess.single, tree.autocorr
   

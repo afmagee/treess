@@ -2,12 +2,8 @@
 #' Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the minimum over all possible reference trees.
 #'
 #' @param dmat Sample-to-sample distance matrix for the MCMC chain.
-#' @param trees For compatibility with eval and call, not used here.
-#' @param nsim For compatibility with eval and call, not used here.
-#' @param alpha For compatibility with eval and call, not used here.
-#' @param min.nsamples For compatibility with eval and call, not used here.
 #' @keywords internal
-minPseudoESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=NA) {
+minPseudoESS <- function(dmat,...) {
   # Shortcut for pseudoESS(summary="min")
   pseudoESS(dmat,summary="min")
 }
@@ -16,12 +12,8 @@ minPseudoESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=NA) {
 #' Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the median over all possible reference trees.
 #'
 #' @param dmat Sample-to-sample distance matrix for the MCMC chain.
-#' @param trees For compatibility with eval and call, not used here.
-#' @param nsim For compatibility with eval and call, not used here.
-#' @param alpha For compatibility with eval and call, not used here.
-#' @param min.nsamples For compatibility with eval and call, not used here.
 #' @keywords internal
-medianPseudoESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=NA) {
+medianPseudoESS <- function(dmat,...) {
   # Shortcut for pseudoESS(summary="median")
   pseudoESS(dmat,summary="median")
 }

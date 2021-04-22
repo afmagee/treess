@@ -14,24 +14,25 @@ getESSMethods <- function(recommended=FALSE) {
     "totalDistanceESS",
     "foldedRankMedioidESS",
     "CMDSESS",
-    # t0 ESS
-    "jumpDistanceBootstrapESS",
-    "jumpDistanceBootstrapUnsmoothedESS",
     # ESS by Frechet generalizations of 1-D metrics
     "frechetCorrelationESS",
     "splitFrequencyESS",
-    # squared-distance-comparing ESS
+    # ad-hoc ESS
+    "jumpDistanceBootstrapESS",
+    "jumpDistanceBootstrapUnsmoothedESS",
     "approximateESS")
   
   if ( recommended ) {
-    stop ( "Option \"recommended\" not yet implemented" )
+    all_methods <- c("minPseudoESS",
+                     "medianPseudoESS",
+                     "frechetCorrelationESS")
   }
   
   return(sort(all_methods))
 }
 
 # A function that always says the ESS is the number of samples taken
-fixedN <- function(dmat,trees=NULL,nsim=NA,alpha=NA,min.nsamples=NA) {
+fixedN <- function(dmat,...) {
   return(dim(dmat)[1])
 }
 
@@ -43,11 +44,12 @@ fixedN <- function(dmat,trees=NULL,nsim=NA,alpha=NA,min.nsamples=NA) {
 #' @param alpha Type I error rate for methods using CIs/hypothesis tests, the proportion of the asymptote used in the approximateESS.
 #' @param nsim For methods using permutation/bootstrap resampling, the number of resampling iterations.
 #' @param min.nsamples The minimum number of samples do be used in calculating summaries (median distance, correlation, etc.). Essentially the maximum time lag considered is length(chains[[i]]) - min.nsamples. Not applicable to dimension reduction methods.
+#' @param max.approximateESS.timelag The maximum time lag considered in the approximateESS, overrides min.nsamples.
 #' @export
 #' @examples
 #' chains <- list(rnorm(100),cumsum(rnorm(100)))
 #' treess(chains,dist)
-treess <- function(x,dist.fn,methods=getESSMethods(),alpha=0.05,nsim=1000,min.nsamples=5) {
+treess <- function(x,dist.fn,methods=getESSMethods(),alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
   
   # Check for valid inputs
   if ( !(any(c("list","mcmc.list") %in% class(x))) ) {

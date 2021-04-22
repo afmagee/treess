@@ -7,7 +7,7 @@
 #' @param min.nsamples We only compute the correlation between x_t and x_{t+T} if there are at least this many samples.
 #' @param lower.bound Should we use the lower-bound ESS or attempt to estimated E(x_t) - E(x_{t+T})^2? Lower bound is faster.
 #' @keywords internal
-frechetCorrelationESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=5,lower.bound=TRUE) {
+frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
   # recover()
   
   # If there's only 1 tree sampled, the ESS is 1

@@ -1,7 +1,7 @@
 #' Computes quantities needed for calculating Monte Carlo error for trees. 
 #'
 #' @param simulated.samples An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).
-#' @param measures The error or variance measure(s) (see details).
+#' @param measures The error or variance measure(s) (see \link{effectiveSizeEquivalentError}).
 #' @return A named list with the distribution for each measure. Same as a single element in \link{effectiveSizeEquivalentError}.
 #' @export
 #' @seealso \link{effectiveSizeEquivalentError}

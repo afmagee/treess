@@ -10,7 +10,7 @@ bruteForceMCMCSE(simulated.samples, measures = c("treeProbSquaredError",
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}
 
-\item{measures}{The error or variance measure(s) (see details).}
+\item{measures}{The error or variance measure(s) (see \link{effectiveSizeEquivalentError}).}
 }
 \value{
 A named list with the distribution for each measure. Same as a single element in \link{effectiveSizeEquivalentError}.

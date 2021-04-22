@@ -6,7 +6,7 @@
 #' @param alpha For compatibility with eval and call, not used here.
 #' @param min.nsamples For compatibility with eval and call, not used here.
 #' @keywords internal
-totalDistanceESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=NA) {
+totalDistanceESS <- function(dmat,...) {
   # recover()
   
   x <- rowSums(dmat)

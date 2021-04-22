@@ -2,12 +2,8 @@
 #' Where there is no unique medioid, calculates the ESS for all and returns the minimum.
 #'
 #' @param dmat Sample-to-sample distance matrix for the MCMC chain.
-#' @param trees For compatibility with eval and call, not used here.
-#' @param nsim For compatibility with eval and call, not used here.
-#' @param alpha For compatibility with eval and call, not used here.
-#' @param min.nsamples For compatibility with eval and call, not used here.
 #' @keywords internal
-foldedRankMedioidESS <- function(dmat,trees=NA,nsim=NA,alpha=NA,min.nsamples=NA) {
+foldedRankMedioidESS <- function(dmat,...) {
   
   # there may not be one unique medioid
   the_medioids <- which(rowSums(dmat) == min(rowSums(dmat)))
