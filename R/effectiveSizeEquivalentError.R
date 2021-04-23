@@ -6,10 +6,14 @@
 #' @param simulated.samples An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).
 #' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
 #' @param measures The error or variance measure(s) (see details).
-#' @param ess.methods The ESS calculation method(s) (see details).
+#' @param ess.methods The ESS calculation method(s). Will also always evaluate the ESS of the log-posterior.
 #' @param observed.trees.only If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.
 #' @param return.ess Should the returned lists include the calculated ESS for each chain? 
 #' @param verbose Should progress be printed to screen?
+#' @param alpha (ESS ARGUMENT) Type I error rate for methods using CIs/hypothesis tests, the proportion of the asymptote used in the approximateESS.
+#' @param nsim (ESS ARGUMENT) For methods using permutation/bootstrap resampling, the number of resampling iterations.
+#' @param min.nsamples (ESS ARGUMENT) The minimum number of samples do be used in calculating summaries (median distance, correlation, etc.). Essentially the maximum time lag considered is length(chains[[i]]) - min.nsamples. Not applicable to dimension reduction methods.
+#' @param max.approximateESS.timelag (ESS ARGUMENT) The maximum time lag considered in the approximateESS, overrides min.nsamples.
 #' @return The first layer are the different ESS methods used, the second the performance measures.
 #' So $CMDSESS$MRCSquaredError contains the distribution of RF distances to the expected MRC tree when drawing ESS samples IID from the true posterior (using CMDSESS for calculating ESS).
 #' @details There are three options for measuring Monte Carlo error.
@@ -20,8 +24,10 @@
 #' The trees in treeProbSquaredError are ordered the same as they are in simulated.samples.
 #' The splits in splitProbSquaredError are ordered the same as calling as.RFcoords(simulated.samples$trees).
 #' The option observed.trees.only is useful for comparing summaries of the Monte Carlo error between ESS iid samples and the MCMC run by guaranteeing no trees are drawn here that are not present in the MCMC chains.
+#' In addition to any ESS methods specified in ess.methods, there will always be a $logPosteriorESS attribute.
+#' This uses the effective sample size of the trace of the log posterior (mass/density).
 #' @export
-effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),observed.trees.only=TRUE,return.ess=TRUE,verbose=TRUE) {
+effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),observed.trees.only=TRUE,return.ess=TRUE,verbose=TRUE,alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
   # recover()
   
   if ( !("simulatedPosterior" %in% class(simulated.samples) )) {
@@ -61,9 +67,10 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   }
   all_ess <- t(sapply(1:nchains,function(j){
     dm <- expandDistanceMatrix(dmat,simulated.samples$indices[,j])
+    # coords <- simulated.samples$coords[simulated.samples$indices[,j]]
     phy <- simulated.samples$trees[simulated.samples$indices[,j]]
     these_ess <- sapply(ess.methods,function(ess_method){
-      eval(call(ess_method,dmat=dm,trees=phy))
+      eval(call(ess_method,dmat=dmat,trees=phy,min.nsamples=min.nsamples,alpha=alpha,nsim=nsim,max.approximateESS.timelag=max.approximateESS.timelag))
     })
     
     if ( verbose ) {
@@ -77,6 +84,13 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
     all_ess <- t(all_ess)
   }
   
+  # Add ESS of log posterior
+  log_post_ess <- sapply(1:nchains,function(j){
+    coda::effectiveSize(simulated.samples$probs[simulated.samples$indices[,j]])
+  })
+  all_ess <- cbind(all_ess,log_post_ess)
+  
+  ess.methods <- c(ess.methods,"logPosteriorESS")
   colnames(all_ess) <- ess.methods
   
   # draw n_eff samples for each chain and each ESS calculated

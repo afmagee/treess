@@ -7,7 +7,9 @@
 effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
   measures = c("treeProbSquaredError", "splitProbSquaredError",
   "MRCSquaredError"), ess.methods = getESSMethods(),
-  observed.trees.only = TRUE, return.ess = TRUE, verbose = TRUE)
+  observed.trees.only = TRUE, return.ess = TRUE, verbose = TRUE,
+  alpha = 0.05, nsim = 1000, min.nsamples = 5,
+  max.approximateESS.timelag = 100)
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).}
@@ -16,13 +18,21 @@ effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
 
 \item{measures}{The error or variance measure(s) (see details).}
 
-\item{ess.methods}{The ESS calculation method(s) (see details).}
+\item{ess.methods}{The ESS calculation method(s). Will also always evaluate the ESS of the log-posterior.}
 
 \item{observed.trees.only}{If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.}
 
 \item{return.ess}{Should the returned lists include the calculated ESS for each chain?}
 
 \item{verbose}{Should progress be printed to screen?}
+
+\item{alpha}{(ESS ARGUMENT) Type I error rate for methods using CIs/hypothesis tests, the proportion of the asymptote used in the approximateESS.}
+
+\item{nsim}{(ESS ARGUMENT) For methods using permutation/bootstrap resampling, the number of resampling iterations.}
+
+\item{min.nsamples}{(ESS ARGUMENT) The minimum number of samples do be used in calculating summaries (median distance, correlation, etc.). Essentially the maximum time lag considered is length(chains[[i]]) - min.nsamples. Not applicable to dimension reduction methods.}
+
+\item{max.approximateESS.timelag}{(ESS ARGUMENT) The maximum time lag considered in the approximateESS, overrides min.nsamples.}
 }
 \value{
 The first layer are the different ESS methods used, the second the performance measures.
@@ -41,4 +51,6 @@ Both (1) and (2) return matrices, with chains in columns and trees/splits in row
 The trees in treeProbSquaredError are ordered the same as they are in simulated.samples.
 The splits in splitProbSquaredError are ordered the same as calling as.RFcoords(simulated.samples$trees).
 The option observed.trees.only is useful for comparing summaries of the Monte Carlo error between ESS iid samples and the MCMC run by guaranteeing no trees are drawn here that are not present in the MCMC chains.
+In addition to any ESS methods specified in ess.methods, there will always be a $logPosteriorESS attribute.
+This uses the effective sample size of the trace of the log posterior (mass/density).
 }

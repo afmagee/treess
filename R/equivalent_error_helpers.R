@@ -3,6 +3,7 @@ splitProbSquaredError <- function(simulated.samples) {
   # recover()
   ntrees <- length(simulated.samples$trees)
   
+  # Not strictly an element of this class of object, but will be added before we ever call splitProbSquaredError
   split_refs <- simulated.samples$coords
   
   # split probabilities in each chain
