@@ -25,7 +25,7 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
   for (i in 1:(n-min.nsamples-1)) {
     rs1 <- rowSums(dmat[-c(1:i),-c(1:i)])
     rs2 <- rowSums(dmat[-c((n-i+1):n),-c((n-i+1):n)])
-    var1 <- sum(rs1)/choose(n-i,2)/4
+    var1 <- sum(rs1)/choose(n-i,2)/4 # /4 not /2 because we've summed the whole square not just an upper/lower diagonal
     var2 <- sum(rs2)/choose(n-i,2)/4
     
     d12 <- mean(dmat[row(dmat) == (col(dmat)+i)])
@@ -34,6 +34,7 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
     covar <- var1 + var2 - d12
     
     if ( !lower.bound ) {
+      stop("This code is untested/unproven")
       # Find index of Karcher mean tree(s), may not be unique
       mu1 <- i + which(rs1 == min(rs1))
       mu2 <- which(rs2 == min(rs2))
