@@ -32,7 +32,6 @@ Runs MCMC targeting the distribution on tree topologies.
 No burnin is required, the chain is initialized from the stationary distribution.
 }
 \examples{
-data(DS3adj)
-post <- simulatePhylogeneticMCMC(DS3adj,ngen=50,nchains=1)
+post <- simulatePhylogeneticMCMC(constructAdjacencyGraph(phangorn::allTrees(5)),ngen=50,nchains=1)
 post$trees[post$indices[,1]]
 }

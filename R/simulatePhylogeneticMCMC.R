@@ -15,8 +15,7 @@
 #' $indices contains a matrix of the MCMC chains as the indices of the trees at each generation, chains in columns, generations in rows.
 #' @export
 #' @examples
-#' data(DS3adj)
-#' post <- simulatePhylogeneticMCMC(DS3adj,ngen=50,nchains=1)
+#' post <- simulatePhylogeneticMCMC(constructAdjacencyGraph(phangorn::allTrees(5)),ngen=50,nchains=1)
 #' post$trees[post$indices[,1]]
 simulatePhylogeneticMCMC <- function(adjacency.graph,ngen=1000,nchains=100,thin=1,verbose=TRUE) {
   # recover()
