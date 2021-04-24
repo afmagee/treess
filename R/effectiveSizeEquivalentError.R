@@ -70,7 +70,7 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
     # coords <- simulated.samples$coords[simulated.samples$indices[,j]]
     phy <- simulated.samples$trees[simulated.samples$indices[,j]]
     these_ess <- sapply(ess.methods,function(ess_method){
-      eval(call(ess_method,dmat=dmat,trees=phy,min.nsamples=min.nsamples,alpha=alpha,nsim=nsim,max.approximateESS.timelag=max.approximateESS.timelag))
+      eval(call(ess_method,dmat=dm,trees=phy,min.nsamples=min.nsamples,alpha=alpha,nsim=nsim,max.approximateESS.timelag=max.approximateESS.timelag))
     })
     
     if ( verbose ) {
