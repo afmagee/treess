@@ -4,19 +4,21 @@
 \alias{plotTreeIntervals}
 \title{Plots intervals for summaries of trees.}
 \usage{
-plotTreeIntervals(x, summary, chains = c(1, 2), threshold = c(0.5,
-  0.75, 0.95), bar.col = c("springgreen4", "firebrick1"),
-  point.col = bar.col, bad.only = FALSE, log.axes = NA, xlab = NA,
-  ylab = NA, main = NA)
+plotTreeIntervals(x, summary, differences = NA, chains = c(1, 2),
+  threshold = c(0.5, 0.75, 0.95), bar.col = c("springgreen4",
+  "firebrick1"), point.col = bar.col, bad.only = FALSE,
+  log.axes = NA, xlab = NA, ylab = NA, main = NA)
 }
 \arguments{
 \item{x}{Output of \link{constructTreeIntervals}.}
 
 \item{summary}{"split" to plot split probabilities, "topology" to plot topology probabilities.}
 
-\item{threshold}{If given as a numeric vector, dashed lines are drawn at these values.}
+\item{differences}{Either NA or output of \link{compareChainProbabilities}. See details.}
 
-\item{bar.col}{CIs/PIs are plotted using bar.col[1] if the intervals overlap and bar.col[2] otherwise. Default is green and red.}
+\item{threshold}{If given as a numeric vector, dashed lines are drawn at these values as a reference.}
+
+\item{bar.col}{CIs/PIs are plotted using bar.col[1] if the probabilities are the same between chains and bar.col[2] otherwise. Default is green and red.}
 
 \item{point.col}{Color of points, default is same as bar color. It is possible to specify a single color.}
 
@@ -35,9 +37,14 @@ Nothing, generates plot.
 }
 \description{
 Plots probabilities of splits or trees estimated by two independent MCMC chains, with confidence/prediction intervals.
+Differences in probabilities between chains are highlighted.
+Differences may be obtained by comparing CIs/PIs between runs (default) or by using CIs on the difference in probabilities between runs.
 }
 \details{
-Colors of cross bars show whether or not the CIs/PIs overlap, highlighting (dis)agreement between chains.
+Colors of cross bars show whether or not the probabilities are significantly different, highlighting (dis)agreement between chains.
+This disagreement can be assessed two ways.
+The default (differences = NA) is to compare CIs for probabilities, and if they do not overlap declare them significantly different.
+Alternately, if differences is given the output of \link{compareChainProbabilities}, comparison is based on whether the CI for the difference in probabilities between runs includes 0 or not.
 Bars that cross thresholds indicate uncertainty with respect to which side of the threshold a split is on.
 By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.95 (strong support for a split).
 }

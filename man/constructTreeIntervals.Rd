@@ -28,9 +28,9 @@ For one or more MCMC chains, constructs confidence/prediction intervals for tree
 The function returns a list of lists.
 The top level of lists is $split and $topology, which separates split and topology probabilities.
 Within each of these is a list, each element containing the intervals for each chain as a matrix.
-Each matrix has splits (or trees) in rows (rows are comparable across chains), and the columns are the point estimate, lower, and upper CIs.
+Each matrix has splits (or trees) in rows (rows are comparable across chains), and the columns are the point estimate, lower, and upper CIs, and the effective sample size.
 Note that prediction intervals are generated once per chain, and do not account for differences in per-chain ESS.
-That is, they use the defaule n.new=n in \link{binomialProportionPI}.
+That is, they use the default n.new=n in \link{binomialProportionPI}.
 }
 \seealso{
 \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{plotTreeIntervals}

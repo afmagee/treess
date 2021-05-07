@@ -10,9 +10,9 @@
 #' @details The function returns a list of lists.
 #' The top level of lists is $split and $topology, which separates split and topology probabilities.
 #' Within each of these is a list, each element containing the intervals for each chain as a matrix.
-#' Each matrix has splits (or trees) in rows (rows are comparable across chains), and the columns are the point estimate, lower, and upper CIs.
+#' Each matrix has splits (or trees) in rows (rows are comparable across chains), and the columns are the point estimate, lower, and upper CIs, and the effective sample size.
 #' Note that prediction intervals are generated once per chain, and do not account for differences in per-chain ESS.
-#' That is, they use the defaule n.new=n in \link{binomialProportionPI}.
+#' That is, they use the default n.new=n in \link{binomialProportionPI}.
 #' @return A list of intervals for each chain, see details.
 #' @export
 #' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{plotTreeIntervals}
@@ -76,16 +76,18 @@ constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Je
   
   chains_splits <- lapply(1:nchains, function(i){
     tmp <- interval_fun(split_probs[[i]],ESS[i])
-    tmp <- cbind(split_probs[[i]],tmp)
+    tmp <- cbind(split_probs[[i]],tmp,rep(ESS[i],length(split_probs[[i]])))
     colnames(tmp)[1] <- "point.est"
+    colnames(tmp)[4] <- "ESS"
     return(tmp)
   })
   names(chains_splits) <- paste0("chain_",1:nchains)
   
   chains_trees <- lapply(1:nchains, function(i){
     tmp <- interval_fun(tree_probs[[i]],ESS[i])
-    tmp <- cbind(tree_probs[[i]],tmp)
+    tmp <- cbind(tree_probs[[i]],tmp,rep(ESS[i],length(tree_probs[[i]])))
     colnames(tmp)[1] <- "point.est"
+    colnames(tmp)[4] <- "ESS"
     return(tmp)
   })
   names(chains_trees) <- paste0("chain_",1:nchains)
@@ -100,24 +102,30 @@ constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Je
 #' Plots intervals for summaries of trees.
 #' 
 #' Plots probabilities of splits or trees estimated by two independent MCMC chains, with confidence/prediction intervals.
+#' Differences in probabilities between chains are highlighted.
+#' Differences may be obtained by comparing CIs/PIs between runs (default) or by using CIs on the difference in probabilities between runs.
 #'
 #' @param x Output of \link{constructTreeIntervals}.
 #' @param summary "split" to plot split probabilities, "topology" to plot topology probabilities.
-#' @param threshold If given as a numeric vector, dashed lines are drawn at these values.
-#' @param bar.col CIs/PIs are plotted using bar.col[1] if the intervals overlap and bar.col[2] otherwise. Default is green and red.
+#' @param differences Either NA or output of \link{compareChainProbabilities}. See details.
+#' @param threshold If given as a numeric vector, dashed lines are drawn at these values as a reference.
+#' @param bar.col CIs/PIs are plotted using bar.col[1] if the probabilities are the same between chains and bar.col[2] otherwise. Default is green and red.
 #' @param point.col Color of points, default is same as bar color. It is possible to specify a single color.
 #' @param bad.only If TRUE, CIs/PIs are only plotted for non-overlapping intervals (bar.col[2]) to highlight chain-chain mismatches.
 #' @param log.axes If TRUE, x- and y-axes are logged. Default is FALSE for splits, TRUE for trees.
 #' @param xlab The x-axis label, NA for defaults.
 #' @param ylab The y-axis label, NA for defaults.
 #' @param main The plot title.
-#' @details Colors of cross bars show whether or not the CIs/PIs overlap, highlighting (dis)agreement between chains.
+#' @details Colors of cross bars show whether or not the probabilities are significantly different, highlighting (dis)agreement between chains.
+#' This disagreement can be assessed two ways.
+#' The default (differences = NA) is to compare CIs for probabilities, and if they do not overlap declare them significantly different.
+#' Alternately, if differences is given the output of \link{compareChainProbabilities}, comparison is based on whether the CI for the difference in probabilities between runs includes 0 or not.
 #' Bars that cross thresholds indicate uncertainty with respect to which side of the threshold a split is on.
 #' By default, thresholds are plotted at p=0.5 (the boundary for being in an MRC tree), 0.75 (moderate support for a split), and 0.95 (strong support for a split).
 #' @return Nothing, generates plot.
 #' @export
 #' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{constructTreeIntervals}
-plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.95),bar.col=c("springgreen4","firebrick1"),point.col=bar.col,bad.only=FALSE,log.axes=NA,xlab=NA,ylab=NA,main=NA) {
+plotTreeIntervals <- function(x,summary,differences=NA,chains=c(1,2),threshold=c(0.5,0.75,0.95),bar.col=c("springgreen4","firebrick1"),point.col=bar.col,bad.only=FALSE,log.axes=NA,xlab=NA,ylab=NA,main=NA) {
   # recover()
   
   if ( length(chains) !=2 ) {
@@ -128,6 +136,7 @@ plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.95)
   if ( length(to.plot) != 1 ) {
     stop("Invalid \"summary\" option.")
   }
+  nchains <- length(x[[to.plot]])
   
   do_log <- ifelse(summary == "split","","xy")
   if ( !is.na(log.axes) ) {
@@ -165,14 +174,29 @@ plotTreeIntervals <- function(x,summary,chains=c(1,2),threshold=c(0.5,0.75,0.95)
   plot(NULL,NULL,xlim=xlim,ylim=ylim,xlab=xlab,ylab=ylab,main=main,log=do_log)
   abline(a=0,b=1,col="grey")
   
-  # track whether intervals overlap (case 1) or not (case 2)
-  l1 <- x[[to.plot]][[chains[1]]][,2]
-  h1 <- x[[to.plot]][[chains[1]]][,3]
-  
-  l2 <- x[[to.plot]][[chains[2]]][,2]
-  h2 <- x[[to.plot]][[chains[2]]][,3]
-  
-  cases <- 1 + as.numeric((l1 < l2 & h1 < l2) | (l1 > h2 & h1 > h2))
+  # track whether probabilities are significantly different (case 2) or not (case 1)
+  cases <- rep(NA,dim(x[[to.plot]][[chains[1]]])[1])
+  if ( !is.list(differences) && is.na(differences) ) {
+    # track whether intervals overlap (case 1) or not (case 2)
+    l1 <- x[[to.plot]][[chains[1]]][,2]
+    h1 <- x[[to.plot]][[chains[1]]][,3]
+    
+    l2 <- x[[to.plot]][[chains[2]]][,2]
+    h2 <- x[[to.plot]][[chains[2]]][,3]
+    
+    cases <- 1 + as.numeric((l1 < l2 & h1 < l2) | (l1 > h2 & h1 > h2))
+  } else {
+    if ( !("list" %in% class(differences)) || 
+         !grepl(summary,names(differences)) || 
+         length(differences[[to.plot]]) != choose(nchains,2) ) {
+      stop("Unrecognized input to argument \"differences\", must either be NA or output of compareChainProbabilities.")
+    }
+    # Find comparison of chains[1] against chains[2]
+    ij <- grep(paste0("chains_",chains[1],"_vs_",chains[2]),names(differences[[to.plot]]))
+    l <- differences[[to.plot]][[ij]][,2]
+    h <- differences[[to.plot]][[ij]][,3]
+    cases <- 1 + as.numeric((l < 0 & h < 0) | (l > 0 & h > 0))
+  }
   
   point_col <- NULL
   if ( length(point_col) == 1 ) {
