@@ -33,20 +33,16 @@ There are a variety of options for differences in binomial proportions with a va
 \examples{
 
 p1 <- rbeta(100,1,1) # Generate probabilities
-p2 <- rbeta(100,1,1) # Generate probabilities
+p2 <- p1 * rbeta(100,5,1) # Generate probabilities
 n1 <- n2 <- 100 # Sample size
-x1 <- rbinom(length(p),n1,p1) # Random variables
-x2 <- rbinom(length(p),n2,p2) # Random variables
+x1 <- rbinom(length(p1),n1,p1) # Random variables
+x2 <- rbinom(length(p2),n2,p2) # Random variables
 
-# compute CIs
-jci <- binomialProportionCI(x/n,n,"jeffreys")
-wci <- binomialProportionCI(x/n,n,"wilson")
-cci <- binomialProportionCI(x/n,n,"wilson.corrected")
+aci <- binomialProportionDifferenceCI(x1/n1,x2/n2,rep(n1,100),rep(n2,100),"AgrestiCoffo")
+jci <- binomialProportionDifferenceCI(x1/n1,x2/n2,rep(n1,100),rep(n2,100),"JeffreysPerks")
 
-# compare performance
-sum(x/n >= jci[,1] & x/n <= jci[,2])/length(p)
-sum(x/n >= wci[,1] & x/n <= wci[,2])/length(p)
-sum(x/n >= cci[,1] & x/n <= cci[,2])/length(p)
+sum(aci[,1] < 0 & aci[,2] > 0)
+sum(jci[,1] < 0 & jci[,2] > 0)
 }
 \references{
 Agresti, A., & Caffo, B. (2000). Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures. The American Statistician, 54(4), 280-288.
