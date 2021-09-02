@@ -6,7 +6,7 @@
 \usage{
 effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
   measures = c("treeProbSquaredError", "splitProbSquaredError",
-  "MRCSquaredError"), ess.methods = getESSMethods(),
+  "MRCSquaredError"), ess.methods = getESSMethods(recommended = FALSE),
   observed.trees.only = TRUE, return.ess = TRUE, verbose = TRUE,
   alpha = 0.05, nsim = 1000, min.nsamples = 5,
   max.approximateESS.timelag = 100)
@@ -18,7 +18,7 @@ effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
 
 \item{measures}{The error or variance measure(s) (see details).}
 
-\item{ess.methods}{The ESS calculation method(s). Will also always evaluate the ESS of the log-posterior.}
+\item{ess.methods}{The ESS calculation method(s). Defaults to all available methods. Will also always evaluate the ESS of the log-posterior.}
 
 \item{observed.trees.only}{If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.}
 

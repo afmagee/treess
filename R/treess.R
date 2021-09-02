@@ -36,7 +36,7 @@ fixedN <- function(dmat,...) {
   return(dim(dmat)[1])
 }
 
-#' Calculate a single effective sample size measure for a tree, or other multivariate/non-Euclidean object.
+#' Calculate one or more effective sample size measures for an MCMC log file containing phylogenetic trees or other multivariate/non-Euclidean objects.
 #'
 #' @param x A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.
 #' @param dist.fn A function suitable to calculate distances between all values in x.
@@ -49,7 +49,7 @@ fixedN <- function(dmat,...) {
 #' @examples
 #' chains <- list(rnorm(100),cumsum(rnorm(100)))
 #' treess(chains,dist)
-treess <- function(x,dist.fn,methods=getESSMethods(),alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
+treess <- function(x,dist.fn,methods=getESSMethods(recommended=TRUE),alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
   
   # Check for valid inputs
   if ( !(any(c("list","mcmc.list") %in% class(x))) ) {

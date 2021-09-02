@@ -4,7 +4,7 @@
 #'
 #' @param x A list of chains containing the MCMC samples of trees as multiPhylo objects.
 #' @param ESS Vector of ESS of each of the MCMC chains in x.
-#' @param type Either "prediction" for prediction intervals or "confidence" for confidence intervals.
+#' @param type Either "confidence" for confidence intervals or "prediction" for prediction intervals.
 #' @param interval.width Width of the interval, value in (0,1), 1 - 2*alpha. 0.95 for 95\% confidence/prediction intervals.
 #' @param method For confidence intervals, method of interval constriction, "Jefreys"|"Wilson"|"ContinuityCorrectedWilson".
 #' @details The function returns a list of lists.
@@ -16,7 +16,7 @@
 #' @return A list of intervals for each chain, see details.
 #' @export
 #' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{plotTreeIntervals}
-constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Jeffreys") {
+constructTreeIntervals <- function(x, ESS, type="confidence", interval.width=0.95, method="Jeffreys") {
   # recover()
   
   # Check for valid inputs
@@ -125,7 +125,7 @@ constructTreeIntervals <- function(x, ESS, type, interval.width=0.95, method="Je
 #' @return Nothing, generates plot.
 #' @export
 #' @seealso \link{binomialProportionCI}, \link{binomialProportionPI}, \link{treeStability}, \link{constructTreeIntervals}
-plotTreeIntervals <- function(x,summary,differences=NA,chains=c(1,2),threshold=c(0.5,0.75,0.95),bar.col=c("springgreen4","firebrick1"),point.col=bar.col,bad.only=FALSE,log.axes=NA,xlab=NA,ylab=NA,main=NA) {
+plotTreeIntervals <- function(x,summary="split",differences=NA,chains=c(1,2),threshold=c(0.5,0.75,0.95),bar.col=c("springgreen4","firebrick1"),point.col=bar.col,bad.only=FALSE,log.axes=NA,xlab=NA,ylab=NA,main=NA) {
   # recover()
   
   if ( length(chains) !=2 ) {
@@ -192,7 +192,7 @@ plotTreeIntervals <- function(x,summary,differences=NA,chains=c(1,2),threshold=c
       stop("Unrecognized input to argument \"differences\", must either be NA or output of compareChainProbabilities.")
     }
     # Find comparison of chains[1] against chains[2]
-    ij <- grep(paste0("chains_",chains[1],"_vs_",chains[2]),names(differences[[to.plot]]))
+    ij <- grep(paste0("chains_",min(chains),"_vs_",max(chains)),names(differences[[to.plot]]))
     l <- differences[[to.plot]][[ij]][,2]
     h <- differences[[to.plot]][[ij]][,3]
     cases <- 1 + as.numeric((l < 0 & h < 0) | (l > 0 & h > 0))

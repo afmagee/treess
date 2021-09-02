@@ -2,10 +2,11 @@
 % Please edit documentation in R/treess.R
 \name{treess}
 \alias{treess}
-\title{Calculate a single effective sample size measure for a tree, or other multivariate/non-Euclidean object.}
+\title{Calculate one or more effective sample size measures for an MCMC log file containing phylogenetic trees or other multivariate/non-Euclidean objects.}
 \usage{
-treess(x, dist.fn, methods = getESSMethods(), alpha = 0.05,
-  nsim = 1000, min.nsamples = 5, max.approximateESS.timelag = 100)
+treess(x, dist.fn, methods = getESSMethods(recommended = TRUE),
+  alpha = 0.05, nsim = 1000, min.nsamples = 5,
+  max.approximateESS.timelag = 100)
 }
 \arguments{
 \item{x}{A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.}
@@ -23,7 +24,7 @@ treess(x, dist.fn, methods = getESSMethods(), alpha = 0.05,
 \item{method}{The method for computing ESS (see details).}
 }
 \description{
-Calculate a single effective sample size measure for a tree, or other multivariate/non-Euclidean object.
+Calculate one or more effective sample size measures for an MCMC log file containing phylogenetic trees or other multivariate/non-Euclidean objects.
 }
 \examples{
 chains <- list(rnorm(100),cumsum(rnorm(100)))

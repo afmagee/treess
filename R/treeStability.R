@@ -186,7 +186,7 @@ treeStabilityConvergence <- function(trees,
     quants <- t(apply(boot,2,quantile,probs=probs,type=1))
     return(list(chain.length=nsamps,quantiles=quants,boot=boot))
   })
-  if ( treess.method %in% getESSMethods() ) {
+  if ( treess.method %in% getESSMethods(recommended=FALSE) ) {
     # Check for user input of these parameters
     alpha <- 0.05
     if ( methods::hasArg(alpha) ) {

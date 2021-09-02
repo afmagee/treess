@@ -4,15 +4,15 @@
 \alias{constructTreeIntervals}
 \title{Constructs intervals for summaries of trees.}
 \usage{
-constructTreeIntervals(x, ESS, type, interval.width = 0.95,
-  method = "Jeffreys")
+constructTreeIntervals(x, ESS, type = "confidence",
+  interval.width = 0.95, method = "Jeffreys")
 }
 \arguments{
 \item{x}{A list of chains containing the MCMC samples of trees as multiPhylo objects.}
 
 \item{ESS}{Vector of ESS of each of the MCMC chains in x.}
 
-\item{type}{Either "prediction" for prediction intervals or "confidence" for confidence intervals.}
+\item{type}{Either "confidence" for confidence intervals or "prediction" for prediction intervals.}
 
 \item{interval.width}{Width of the interval, value in (0,1), 1 - 2*alpha. 0.95 for 95\% confidence/prediction intervals.}
 

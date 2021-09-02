@@ -4,10 +4,11 @@
 \alias{plotTreeIntervals}
 \title{Plots intervals for summaries of trees.}
 \usage{
-plotTreeIntervals(x, summary, differences = NA, chains = c(1, 2),
-  threshold = c(0.5, 0.75, 0.95), bar.col = c("springgreen4",
-  "firebrick1"), point.col = bar.col, bad.only = FALSE,
-  log.axes = NA, xlab = NA, ylab = NA, main = NA)
+plotTreeIntervals(x, summary = "split", differences = NA,
+  chains = c(1, 2), threshold = c(0.5, 0.75, 0.95),
+  bar.col = c("springgreen4", "firebrick1"), point.col = bar.col,
+  bad.only = FALSE, log.axes = NA, xlab = NA, ylab = NA,
+  main = NA)
 }
 \arguments{
 \item{x}{Output of \link{constructTreeIntervals}.}

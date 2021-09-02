@@ -6,7 +6,7 @@
 #' @param simulated.samples An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).
 #' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
 #' @param measures The error or variance measure(s) (see details).
-#' @param ess.methods The ESS calculation method(s). Will also always evaluate the ESS of the log-posterior.
+#' @param ess.methods The ESS calculation method(s). Defaults to all available methods. Will also always evaluate the ESS of the log-posterior.
 #' @param observed.trees.only If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.
 #' @param return.ess Should the returned lists include the calculated ESS for each chain? 
 #' @param verbose Should progress be printed to screen?
@@ -27,7 +27,7 @@
 #' In addition to any ESS methods specified in ess.methods, there will always be a $logPosteriorESS attribute.
 #' This uses the effective sample size of the trace of the log posterior (mass/density).
 #' @export
-effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(),observed.trees.only=TRUE,return.ess=TRUE,verbose=TRUE,alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
+effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measures=c("treeProbSquaredError","splitProbSquaredError","MRCSquaredError"),ess.methods=getESSMethods(recommended=FALSE),observed.trees.only=TRUE,return.ess=TRUE,verbose=TRUE,alpha=0.05,nsim=1000,min.nsamples=5,max.approximateESS.timelag=100) {
   # recover()
   
   if ( !("simulatedPosterior" %in% class(simulated.samples) )) {
@@ -62,7 +62,7 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   
   # get ESS for every method for every chain
   if ( verbose ) {
-    cat("Computing ESS for all measures and all chain\n")
+    cat("Computing ESS for all measures and all chains\n")
     pb <- txtProgressBar(max=nchains,style=3)
   }
   all_ess <- t(sapply(1:nchains,function(j){

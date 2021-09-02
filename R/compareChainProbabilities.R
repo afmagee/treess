@@ -65,7 +65,7 @@ compareChainProbabilities <- function(x, ESS, interval.width=0.95, method="Agres
   chains_splits <- vector("list",choose(length(x),2))
   idx <- 0
   for (i in 1:(nchains-1)) {
-    for ( j in 2:nchains) {
+    for ( j in (i+1):nchains) {
       idx <- idx + 1
       ess_i <- rep(ESS[i],length(split_probs[[i]]))
       ess_j <- rep(ESS[j],length(split_probs[[j]]))
@@ -83,7 +83,7 @@ compareChainProbabilities <- function(x, ESS, interval.width=0.95, method="Agres
   chains_trees <- vector("list",choose(length(x),2))
   idx <- 0
   for (i in 1:(nchains-1)) {
-    for ( j in 2:nchains) {
+    for ( j in (i+1):nchains) {
       idx <- idx + 1
       ess_i <- rep(ESS[i],length(tree_probs[[i]]))
       ess_j <- rep(ESS[j],length(tree_probs[[j]]))
