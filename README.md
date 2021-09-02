@@ -39,7 +39,7 @@ To get the ESS of the concatenated MCMC chain, the following code may be helpful
     class(all_chains_concatenated) <- "multiPhylo"
 
     # Compute all ESS measures for concatenated chain
-    all_ess_measures_concatenated <- treess(all_chains_concatenated,dist.fn=RF.dist)
+    all_ess_measures_concatenated <- treess(list(all_chains_concatenated),dist.fn=RF.dist)
 
 ## Comparing multiple chains with confidence
 
