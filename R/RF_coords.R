@@ -49,15 +49,15 @@ trees2Coords <- function(trees,namesplits=FALSE) {
   # Order alphabetically
   all_splits <- all_splits[,order(colnames(all_splits))]
   
-  # Remove trivial splits
-  trivial <- rowSums(all_splits) == 1 | rowSums(all_splits) == ntax  | rowSums(all_splits) == (ntax - 1)
-  
-  all_splits <- all_splits[!trivial,]
-  
   # Polarize, our rule here is that all splits should include the first taxon
   to_polarize <- all_splits[,1] == 0
   
   all_splits[to_polarize,] <- -1 * (all_splits[to_polarize,] - 1)
+  
+  # Remove trivial splits (no taxa/all taxa, 1 taxa, all taxa but 1 (which is the inverted view of a 1-taxon split))
+  trivial <- rowSums(all_splits) == 1 | rowSums(all_splits) == ntax  | rowSums(all_splits) == (ntax - 1)  | rowSums(all_splits) == 0
+  
+  all_splits <- all_splits[!trivial,]
   
   # Collapse to strings
   split_names <- c()
