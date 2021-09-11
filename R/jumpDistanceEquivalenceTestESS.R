@@ -53,7 +53,10 @@ jumpDistanceEquivalenceTestESS <- function(dmat,min.nsamples,nsim,alpha,bootstra
   # permute matrices to get appropriate autocorrelation
   off_diag <- row(dmat) == col(dmat)+1
   null_dist <- sapply(1:nsim,function(i){
+    # The new order of the rows and columns
     permute <- sample.int(n,replace=bootstrap)
+    # Do not the entire distance matrix just to take an off diagonal
+    # Instead, draw indices of new rows and columns, and extract the diagonal from those indices
     central_tendency(sapply(1:(n-1),function(i){dmat[permute[i],permute[i+1]]}))
   })
   threshold <- quantile(null_dist,probs=alpha)
@@ -67,7 +70,7 @@ jumpDistanceEquivalenceTestESS <- function(dmat,min.nsamples,nsim,alpha,bootstra
     # Check for ESS = n
     thin <- 1
   } else {
-    for (i in 2:(n-min.nsamples+1)) {
+    for (i in 2:(n-min.nsamples-1)) {
       # distance at this time lag
       g_s <- central_tendency(dmat[row(dmat) == col(dmat)+i])
       G_s[i] <- max(g_s,G_s[i-1])

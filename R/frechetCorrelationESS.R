@@ -22,11 +22,17 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
   # Compute covariances only as far as we need to
   cors <- numeric(n-min.nsamples-1)
   P <- rep(NA,floor((n-min.nsamples)/2))
+  # # TODO: the following should be a more efficient way to get var1 and var2, at the cost of only working for a lower bound
+  # ssq_front_back <- diag(apply(apply(dmat, 2, cumsum), 1, cumsum))
+  # ssq_back_front <- diag(apply(apply(dmat[n:1,n:1], 2, cumsum), 1, cumsum))
+  # for (i in 1:(n-min.nsamples-1)) {
+  #   var1 <- ssq_front_back[n-i]/(2*(n-i)*(n-i-1))
+  #   var2 <- ssq_back_front[n-i]/(2*(n-i)*(n-i-1))
   for (i in 1:(n-min.nsamples-1)) {
     rs1 <- rowSums(dmat[-c(1:i),-c(1:i)])
     rs2 <- rowSums(dmat[-c((n-i+1):n),-c((n-i+1):n)])
-    var1 <- sum(rs1)/choose(n-i,2)/4 # /4 not /2 because we've summed the whole square not just an upper/lower diagonal
-    var2 <- sum(rs2)/choose(n-i,2)/4
+    var1 <- sum(rs1)/(2*(n-i)*(n-i-1)) # extra factor of 2 because we're summing over the whole square and not an upper/lower triangular portion
+    var2 <- sum(rs2)/(2*(n-i)*(n-i-1))
     
     d12 <- mean(dmat[row(dmat) == (col(dmat)+i)])
     
@@ -60,25 +66,38 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
       cors[i] <- covar/sqrt(var1*var2) 
     }
     
-    if ( i %% 2 == 0 ) {
-      P[i/2] <- cors[i] + cors[i-1]
-      if ( P[i/2] < 0 ) {
+    # We want to combine (0,1), (2,3), ... but we're indexing starting at 1
+    if ( i %% 2 == 1 ) {
+      if ( i > 1) {
+        P[(i+1)/2] <- cors[i] + cors[i-1]
+      } else {
+        # cors[0] is 1.0
+        P[(i+1)/2] <- cors[i] + 1.0
+      }
+      if ( P[(i+1)/2] < 0 ) {
         break
+        # We only sum over P > 0 so we don't need further terms
       }
     } 
   }
   
   # Smoothed P, aka P' in Vehtari et al.
+  # Remove any P we did not compute and thus do not need
   P <- P[!is.na(P)]
   for (i in 2:length(P)) {
-    P[i] <- min(P[i-1],cors[2*i-1] + cors[2*i])
+    P[i] <- min(P[i],P[i-1])
   }
   
-  tau_hat <- 1
-  if ( P[1] > 0 ) {
-    # Last P is < 0 by construction
-    k <- length(P) - 1
-    tau_hat <- 1 + 2 * sum(P[1:k])
+  # Unless we summed over all time lags, we stopped when P[length(P)] < 0
+  k <- length(P) - 1
+  if ( P[length(P)] > 0 ) {
+    k <- length(P)
+  }
+  tau_hat <- -1 + 2 * sum(P[1:k])
+
+  # Paranoid exception handling
+  if (tau_hat < 0) {
+    tau_hat <- 1 
   }
   
   return(n/tau_hat)
