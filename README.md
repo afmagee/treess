@@ -9,7 +9,7 @@ Installation requires the package `devtools`:
 Note that while treess depends on `ape`, `coda`, and `phangorn`, it does not load any of them.
 
 ## Citation
-If using `treess`, please cite: Magee, A F, Karcher, M D, Matsen, E M, and Minin, V M. How trustworthy is your tree? Bayesian phylogenetic effective sample size through the lens of Monte Carlo error.
+If using `treess`, please cite: Magee, A F, Karcher, M D, Matsen, E M, and Minin, V M. How trustworthy is your tree? Bayesian phylogenetic effective sample size through the lens of Monte Carlo error. arXiv:2109.07629
 
 If using the approximateESS, medianPseudoESS, or minPseudoESS, please also cite: Lanfear, R, Hua, X, & Warren, D L (2016). Estimating the effective sample size of tree topologies from Bayesian phylogenetic analyses. Genome Biology and Evolution, 8(8), 2319-2332.
 
