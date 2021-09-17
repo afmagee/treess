@@ -24,7 +24,7 @@ The following pseudo-code may be useful.
 
     # Read in samples
     tree_samples_chain_1 <- read.tree("/path/to/chain1.trees")
-    tree_samples_chain_2 <- read.tree("/path/to/chain1.trees")
+    tree_samples_chain_2 <- read.tree("/path/to/chain2.trees")
 
     # List all chains
     all_chains <- list(tree_samples_chain_1,tree_samples_chain_2)
