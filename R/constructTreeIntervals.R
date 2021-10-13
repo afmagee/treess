@@ -204,6 +204,13 @@ plotTreeIntervals <- function(x,summary="split",differences=NA,chains=c(1,2),thr
   } else {
     point_col <- point.col[cases]
   }
+  
+  bar_col <- NULL
+  if (length(bar.col) == 1) {
+    bar_col <- rep(bar.col, length(cases))
+  } else {
+    bar_col <- bar.col[cases]
+  }
 
   # green for intervals that overlap
   # red otherwise
@@ -215,8 +222,8 @@ plotTreeIntervals <- function(x,summary="split",differences=NA,chains=c(1,2),thr
       xr <- x[[to.plot]][[chains[1]]][i,2:3]
       yr <- x[[to.plot]][[chains[2]]][i,2:3]
       
-      lines(xr,c(yc,yc),col=bar.col[cases[i]])
-      lines(c(xc,xc),yr,col=bar.col[cases[i]])
+      lines(xr,c(yc,yc),col=bar_col[cases[i]])
+      lines(c(xc,xc),yr,col=bar_col[cases[i]])
     }
   }
   
