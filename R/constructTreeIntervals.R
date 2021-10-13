@@ -199,7 +199,7 @@ plotTreeIntervals <- function(x,summary="split",differences=NA,chains=c(1,2),thr
   }
   
   point_col <- NULL
-  if ( length(point_col) == 1 ) {
+  if ( length(point.col) == 1 ) {
     point_col <- rep(point.col,length(cases))
   } else {
     point_col <- point.col[cases]
