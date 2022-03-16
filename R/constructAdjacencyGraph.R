@@ -69,7 +69,11 @@ constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALS
       res$NNI <- nni_adjacencies
       
       # Report to user
-      cat(paste0("Provided trees (",sum(comp$csize)," trees total) not connected, trimming down to largest connected subset (",n," trees total)\n"))
+      cat(paste0("Provided trees not connected, trimming down to largest connected subset\n"))
+      cat(paste0("Original tree count: ",sum(comp$csize),"\n"))
+      cat(paste0("Total probability of original trees: ",sum(weights),"\n"))
+      cat(paste0("New tree count: ",n,"\n"))
+      cat(paste0("Total probability of new tree set: ",sum(weights[keep]),"\n"))
     }
   }
   
