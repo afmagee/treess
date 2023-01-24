@@ -4,8 +4,13 @@
 \alias{simulatePhylogeneticMCMC}
 \title{NNI-based exploration of tree graph.}
 \usage{
-simulatePhylogeneticMCMC(adjacency.graph, ngen = 1000, nchains = 100,
-  thin = 1, verbose = TRUE)
+simulatePhylogeneticMCMC(
+  adjacency.graph,
+  ngen = 1000,
+  nchains = 100,
+  thin = 1,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{adjacency.graph}{An object of class treeAdjacencyGraph.}

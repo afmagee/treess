@@ -4,12 +4,19 @@
 \alias{effectiveSizeEquivalentError}
 \title{Estimates distribution of error if we drew ESS trees IID from the (known) posterior distribution.}
 \usage{
-effectiveSizeEquivalentError(simulated.samples, tree.dist = "RF",
-  measures = c("treeProbSquaredError", "splitProbSquaredError",
-  "MRCSquaredError"), ess.methods = getESSMethods(recommended = FALSE),
-  observed.trees.only = TRUE, return.ess = TRUE, verbose = TRUE,
-  alpha = 0.05, nsim = 1000, min.nsamples = 5,
-  max.approximateESS.timelag = 100)
+effectiveSizeEquivalentError(
+  simulated.samples,
+  tree.dist = "RF",
+  measures = c("treeProbSquaredError", "splitProbSquaredError", "MRCSquaredError"),
+  ess.methods = getESSMethods(recommended = FALSE),
+  observed.trees.only = TRUE,
+  return.ess = TRUE,
+  verbose = TRUE,
+  alpha = 0.05,
+  nsim = 1000,
+  min.nsamples = 5,
+  max.approximateESS.timelag = 100
+)
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).}

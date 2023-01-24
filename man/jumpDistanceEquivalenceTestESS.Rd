@@ -4,8 +4,15 @@
 \alias{jumpDistanceEquivalenceTestESS}
 \title{Computes ESS by finding the time lag at which the "jump distance" curve becomes indistinguishable from the jump distances of an uncorrelated set of samples from the same target distribution.}
 \usage{
-jumpDistanceEquivalenceTestESS(dmat, min.nsamples, nsim, alpha, bootstrap,
-  interpolate, use.median = TRUE)
+jumpDistanceEquivalenceTestESS(
+  dmat,
+  min.nsamples,
+  nsim,
+  alpha,
+  bootstrap,
+  interpolate,
+  use.median = TRUE
+)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}

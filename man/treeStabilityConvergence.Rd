@@ -4,10 +4,18 @@
 \alias{treeStabilityConvergence}
 \title{Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.}
 \usage{
-treeStabilityConvergence(trees, nsizes = 10, nrep = 100,
-  probs = c(0.05, 0.5, 0.95), consensus.threshold = c(0.5, 0.75, 0.95),
-  ACT = "sqrt", spacing = "logarithmic", min.split.freq = 0.01,
-  treess.method = "none", ...)
+treeStabilityConvergence(
+  trees,
+  nsizes = 10,
+  nrep = 100,
+  probs = c(0.05, 0.5, 0.95),
+  consensus.threshold = c(0.5, 0.75, 0.95),
+  ACT = "sqrt",
+  spacing = "logarithmic",
+  min.split.freq = 0.01,
+  treess.method = "none",
+  ...
+)
 }
 \arguments{
 \item{trees}{The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords.}

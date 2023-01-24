@@ -1,3 +1,31 @@
+#' Gets a sparse representation of a spanning tree from a distance matrix.
+#' 
+#' @param x A distance matrix
+#' @return Vector of all edges in the spanning tree (contains both i->j and j->i for any connected values i and j)
+#' @keywords internal
+getSparseSpanningTree <- function(x) {
+  spanning_tree <- NULL
+  # igraph is not exactly light-weight but it makes MSTs a _lot_ faster
+  if ( requireNamespace("igraph",quietly=TRUE) ) {
+    igraph_x <- igraph::graph.adjacency(x,weighted=TRUE,mode="undirected")
+    igraph_spanning_tree <- igraph::mst(igraph_x)
+    spanning_tree <- igraph::as_adjacency_matrix(igraph_spanning_tree,sparse=FALSE)
+  } else {
+    spanning_tree <- ape::mst(x)
+  }
+  
+  # recover()
+  
+  # This will make things much faster for computing test statistics
+  sparse_spanning_tree <- lapply(1:dim(spanning_tree)[1],function(i){
+    j <- which(spanning_tree[i,] == 1)
+    return(cbind(i,j))
+  })
+  sparse_spanning_tree <- do.call(rbind,sparse_spanning_tree)
+  
+  return(sparse_spanning_tree)
+}
+
 #' Finds s0 for a piecewise constant curve by linear interpolation.
 #' 
 #' Curve is assumed to be nondecreasing.

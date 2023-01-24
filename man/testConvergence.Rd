@@ -4,9 +4,15 @@
 \alias{testConvergence}
 \title{Test for global convergence of multiple MCMC chains.}
 \usage{
-testConvergence(x, dist.fn, methods = getConvergenceTestMethods(),
-  alpha = 0.05, threshold = 1.01, identify.outliers = TRUE,
-  min.split.freq = 0.01)
+testConvergence(
+  x,
+  dist.fn,
+  methods = getConvergenceTestMethods(),
+  alpha = 0.05,
+  threshold = 1.01,
+  identify.outliers = TRUE,
+  min.split.freq = 0.01
+)
 }
 \arguments{
 \item{x}{List of all chains of the tree-valued (or multivariate or non-Euclidean) variable(s) for which to compute convergence.}

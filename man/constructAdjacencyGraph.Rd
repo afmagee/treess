@@ -4,8 +4,7 @@
 \alias{constructAdjacencyGraph}
 \title{Computes the NNI adjacency graph for a set of (unique) tree topologies.}
 \usage{
-constructAdjacencyGraph(trees, weights = rep(1, length(trees)),
-  trim = FALSE)
+constructAdjacencyGraph(trees, weights = rep(1, length(trees)), trim = FALSE)
 }
 \arguments{
 \item{trees}{A multiPhylo object or list of phylo objects}

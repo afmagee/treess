@@ -4,8 +4,12 @@
 \alias{compareChainProbabilities}
 \title{Constructs intervals for differences (between chains) of summaries of trees.}
 \usage{
-compareChainProbabilities(x, ESS, interval.width = 0.95,
-  method = "AgrestiCoffo")
+compareChainProbabilities(
+  x,
+  ESS,
+  interval.width = 0.95,
+  method = "AgrestiCoffo"
+)
 }
 \arguments{
 \item{x}{A list of chains containing the MCMC samples of trees as multiPhylo objects.}

@@ -4,9 +4,15 @@
 \alias{treess}
 \title{Calculate one or more effective sample size measures for an MCMC log file containing phylogenetic trees or other multivariate/non-Euclidean objects.}
 \usage{
-treess(x, dist.fn, methods = getESSMethods(recommended = TRUE),
-  alpha = 0.05, nsim = 1000, min.nsamples = 5,
-  max.approximateESS.timelag = 100)
+treess(
+  x,
+  dist.fn,
+  methods = getESSMethods(recommended = TRUE),
+  alpha = 0.05,
+  nsim = 1000,
+  min.nsamples = 5,
+  max.approximateESS.timelag = 100
+)
 }
 \arguments{
 \item{x}{A list of chains containing tree-valued (or multivariate or non-Euclidean) variable for which to compute ESS.}

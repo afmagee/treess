@@ -4,8 +4,7 @@
 \alias{ASDSFPermutationTest}
 \title{Tests the null hypothesis that a set of chains come from the same distributions against the alternative that they are different.}
 \usage{
-ASDSFPermutationTest(coords, ngen, nchains, min.split.freq, nrep = 500,
-  ...)
+ASDSFPermutationTest(coords, ngen, nchains, min.split.freq, nrep = 500, ...)
 }
 \arguments{
 \item{coords}{A 0/1 matrix of the splits in each tree (RF coordinate matrix).}

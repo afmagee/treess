@@ -4,8 +4,7 @@
 \alias{approximateESS}
 \title{Calculates the approximate ESS of Lanfear et al. (2015).}
 \usage{
-approximateESS(dmat, max.approximateESS.timelag = 100, alpha = 0.05,
-  ...)
+approximateESS(dmat, max.approximateESS.timelag = 100, alpha = 0.05, ...)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for chains, NOT SQUARED.}

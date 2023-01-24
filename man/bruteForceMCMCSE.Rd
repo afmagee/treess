@@ -4,8 +4,10 @@
 \alias{bruteForceMCMCSE}
 \title{Computes quantities needed for calculating Monte Carlo error for trees.}
 \usage{
-bruteForceMCMCSE(simulated.samples, measures = c("treeProbSquaredError",
-  "splitProbSquaredError", "MRCSquaredError"))
+bruteForceMCMCSE(
+  simulated.samples,
+  measures = c("treeProbSquaredError", "splitProbSquaredError", "MRCSquaredError")
+)
 }
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of simulatePhylogeneticMCMC).}

@@ -4,9 +4,18 @@
 \alias{plotTreeStabilityConvergence}
 \title{Visualizes stability of the tree estimates from a sample of trees over the length of the run.}
 \usage{
-plotTreeStabilityConvergence(tree.stability.convergence, stat,
-  colors = NA, CI.color.alpha = 0.5, plot.median = TRUE,
-  use.ess = TRUE, xlab = NA, ylab = NA, main = NA, ...)
+plotTreeStabilityConvergence(
+  tree.stability.convergence,
+  stat,
+  colors = NA,
+  CI.color.alpha = 0.5,
+  plot.median = TRUE,
+  use.ess = TRUE,
+  xlab = NA,
+  ylab = NA,
+  main = NA,
+  ...
+)
 }
 \arguments{
 \item{tree.stability.convergence}{Output of treeStabilityConvergence.}

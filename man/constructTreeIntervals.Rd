@@ -4,8 +4,13 @@
 \alias{constructTreeIntervals}
 \title{Constructs intervals for summaries of trees.}
 \usage{
-constructTreeIntervals(x, ESS, type = "confidence",
-  interval.width = 0.95, method = "Jeffreys")
+constructTreeIntervals(
+  x,
+  ESS,
+  type = "confidence",
+  interval.width = 0.95,
+  method = "Jeffreys"
+)
 }
 \arguments{
 \item{x}{A list of chains containing the MCMC samples of trees as multiPhylo objects.}

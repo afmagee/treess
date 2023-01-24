@@ -6,8 +6,13 @@
 Uses (nonparametric) bootstrapping to compute the null distribution.
 Uses linear interpolation to smooth results.}
 \usage{
-jumpDistanceBootstrapUnsmoothedESS(dmat, min.nsamples = 5, nsim = 1000,
-  alpha = 0.05, ...)
+jumpDistanceBootstrapUnsmoothedESS(
+  dmat,
+  min.nsamples = 5,
+  nsim = 1000,
+  alpha = 0.05,
+  ...
+)
 }
 \arguments{
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}

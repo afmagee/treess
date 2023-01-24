@@ -4,9 +4,14 @@
 \alias{treeStability}
 \title{Examines stability of tree-based summaries from a sample of trees using a block-bootstrap to resample the MCMC run.}
 \usage{
-treeStability(trees, consensus.threshold = c(0.5, 0.75, 0.95),
-  nrep = 100, min.split.freq = 0.01, probs = c(0.05, 0.5, 0.95),
-  ACT = "sqrt")
+treeStability(
+  trees,
+  consensus.threshold = c(0.5, 0.75, 0.95),
+  nrep = 100,
+  min.split.freq = 0.01,
+  probs = c(0.05, 0.5, 0.95),
+  ACT = "sqrt"
+)
 }
 \arguments{
 \item{trees}{The sample of trees from the posterior. A multiPhylo object, or a coordinate matrix as from as.RFcoords(trees)$coords.}
