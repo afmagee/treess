@@ -107,7 +107,6 @@ holmesTest <- function(x,
     }
     B <- idx
     S_star <- S_star[1:idx]
-    p_se <- sd(S_star > S_0)/sqrt(B)
   }
   
   p <- sum(S_star > S_0)/B
@@ -115,8 +114,7 @@ holmesTest <- function(x,
     p.value = p,
     S_0 = S_0,
     R = R,
-    B = B,
-    p.value.standard.error = p_se
+    B = B
   )
   if (returnNullDistribution) {
     res$nullDistribution = S_star
