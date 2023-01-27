@@ -6,7 +6,7 @@
 #' @param rel.cutoff We stop sampling new trees when the test statistic stops fluctuating by more than this proportion
 #' @return Vector of all edges in the spanning tree (contains both i->j and j->i for any connected values i and j)
 #' @keywords internal
-getSparseSpanningTreeListHolmes <- function(x,R,labels,rel.cutoff=0.01) {
+getSparseSpanningTreeListHolmes <- function(x,R,labels,se.cutoff=0.25) {
   sparse_spanning_trees <- list()
   if ( is.numeric(R) ) {
     sparse_spanning_trees <- lapply(1:R,function(i){
@@ -14,23 +14,25 @@ getSparseSpanningTreeListHolmes <- function(x,R,labels,rel.cutoff=0.01) {
     })
   } else if ( grepl("auto",R) ) {
     sparse_spanning_trees <- vector("list",100)
+    stats <- numeric(100)
     
     # Start with a large enough sample to get a sense of the true average
-    sparse_spanning_trees[1:19] <- lapply(1:19,function(i){getSparseSpanningTree(x,shuffle=TRUE)})
+    nstart <- 20
+    sparse_spanning_trees[1:nstart] <- lapply(1:nstart,function(i){getSparseSpanningTree(x,shuffle=TRUE)})
+    stats[1:nstart] <- sapply(1:nstart,function(i){holmesTestStat(sparse_spanning_trees[[i]],labels)})
     
-    idx <- 19
-    delta <- Inf
-    
-    stat <- holmesTestStat(sparse_spanning_trees[1:idx],labels)
-    while (delta/stat > rel.cutoff) {
-      old_stat <- stat
+    idx <- nstart
+    se <- sd(stats[1:idx])/sqrt(idx)
+    while (se > se.cutoff) {
       idx <- idx + 1
       if ( idx > length(sparse_spanning_trees) ) {
         sparse_spanning_trees <- c(sparse_spanning_trees,vector("list",100))
+        stats <- c(stats,numeric(100))
       }
       sparse_spanning_trees[[idx]] <- getSparseSpanningTree(x,shuffle=TRUE)
-      stat <- holmesTestStat(sparse_spanning_trees[1:idx],labels)
-      delta <- abs(stat - old_stat)
+      stats[idx] <- holmesTestStat(sparse_spanning_trees[[idx]],labels)
+      se <- sd(stats[1:idx])/sqrt(idx)
+      # cat(idx,": ",se,"\n")
     }
     sparse_spanning_trees <- sparse_spanning_trees[1:idx]
   } else {

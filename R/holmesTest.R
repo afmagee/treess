@@ -215,7 +215,7 @@ prepForHolmes <- function(x,dist.fn,labels=NULL) {
 #' @keywords internal
 holmesTestStat <- function(sparseSpanningTrees,labels) {
   
-  if (class(sparseSpanningTrees) == "matrix") {
+  if ("matrix" %in% class(sparseSpanningTrees)) {
     sparseSpanningTrees <- list(sparseSpanningTrees)
   }
   
