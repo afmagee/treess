@@ -47,7 +47,17 @@ holmesTest <- function(x,
                        B="automatic",
                        R="automatic",
                        returnNullDistribution=FALSE,
+                       bootstrap.se.tolerance=0.005,
                        ...) {
+  
+  # Check inputs before doing costly things
+  if ( (!is.numeric(B)) && (!grepl("auto",B)) ) {
+    stop("Invalid input for number of bootstrap replicates B.")
+  }
+
+  if ( (!is.numeric(R)) && (!grepl("auto",R)) ) {
+    stop("Invalid input for number of replicate non-unique MST trees R.")
+  }
   
   tmp <- prepForHolmes(x=x,dist.fn=dist.fn,labels=labels)
   x <- tmp$x
@@ -71,16 +81,42 @@ holmesTest <- function(x,
   
   S_0 <- holmesTestStat(sparse_spanning_trees,labels)
   
-  S_star <- sapply(1:B,function(b){
-    holmesTestStat(sparse_spanning_trees,sample(labels))
-  })
+  p_se <- NA
+  S_star <- numeric()
+  if ( is.numeric(B) ) {
+    S_star <- sapply(1:B,function(b){
+      holmesTestStat(sparse_spanning_trees,sample(labels))
+    })
+  } else {
+    
+    S_star <- numeric(1000)
+    S_star[1:100] <- sapply(1:100,function(b){
+      holmesTestStat(sparse_spanning_trees,sample(labels))
+    })
+    
+    idx <- 100
+    se <- sd(S_star[1:100] > S_0)/sqrt(100)
+    
+    while (se > bootstrap.se.tolerance) {
+      idx <- idx + 1
+      if ( idx > length(S_star) ) {
+        S_star <- c(S_star,vector("numeric",1000))
+      }
+      S_star[idx] <- holmesTestStat(sparse_spanning_trees,sample(labels))
+      se <- sd(S_star[1:idx] > S_0)/sqrt(idx)
+    }
+    B <- idx
+    S_star <- S_star[1:idx]
+    p_se <- sd(S_star > S_0)/sqrt(B)
+  }
   
   p <- sum(S_star > S_0)/B
   res <- list(
     p.value = p,
     S_0 = S_0,
     R = R,
-    B = B
+    B = B,
+    p.value.standard.error = p_se
   )
   if (returnNullDistribution) {
     res$nullDistribution = S_star
