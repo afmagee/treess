@@ -1,11 +1,68 @@
 #' Gets a sparse representation of a spanning tree from a distance matrix.
 #' 
 #' @param x A distance matrix
+#' @param R Either a number of MSTs to collect (to account for non-uniqueness) or "automatic" to chose the number based on the stabilization of the Holmes test statistic
+#' @param labels The labels, as in holmesTest
+#' @param rel.cutoff We stop sampling new trees when the test statistic stops fluctuating by more than this proportion
 #' @return Vector of all edges in the spanning tree (contains both i->j and j->i for any connected values i and j)
 #' @keywords internal
-getSparseSpanningTree <- function(x) {
+getSparseSpanningTreeListHolmes <- function(x,R,labels,rel.cutoff=0.01) {
+  sparse_spanning_trees <- list()
+  if ( is.numeric(R) ) {
+    sparse_spanning_trees <- lapply(1:R,function(i){
+      getSparseSpanningTree(x,shuffle=TRUE)
+    })
+  } else if ( grepl("auto",R) ) {
+    sparse_spanning_trees <- vector("list",100)
+    
+    # Start with a large enough sample to get a sense of the true average
+    sparse_spanning_trees[1:19] <- lapply(1:19,function(i){getSparseSpanningTree(x,shuffle=TRUE)})
+    
+    idx <- 19
+    delta <- Inf
+    
+    stat <- holmesTestStat(sparse_spanning_trees[1:idx],labels)
+    while (delta/stat > rel.cutoff) {
+      old_stat <- stat
+      idx <- idx + 1
+      if ( idx > length(sparse_spanning_trees) ) {
+        sparse_spanning_trees <- c(sparse_spanning_trees,vector("list",100))
+      }
+      sparse_spanning_trees[[idx]] <- getSparseSpanningTree(x,shuffle=TRUE)
+      stat <- holmesTestStat(sparse_spanning_trees[1:idx],labels)
+      delta <- abs(stat - old_stat)
+    }
+    sparse_spanning_trees <- sparse_spanning_trees[1:idx]
+  } else {
+    stop("Invalid input for argument \"R\"")
+  }
+  return(sparse_spanning_trees)
+}
+
+
+#' Gets a sparse representation of a spanning tree from a distance matrix.
+#' 
+#' @param x A distance matrix
+#' @param shuffle If true, the distance matrix is permuted before the MST is obtained, then re-sorted to match the original order. Potentially useful if MST is not unique.
+#' @return Vector of all edges in the spanning tree (contains both i->j and j->i for any connected values i and j)
+#' @keywords internal
+getSparseSpanningTree <- function(x,shuffle=FALSE) {
   spanning_tree <- NULL
-  # igraph is not exactly light-weight but it makes MSTs a _lot_ faster
+  
+  # Permuting the distance matrix
+  permute <- NULL
+  if (shuffle) {
+    n <- dim(x)[1]
+    tmp <- matrix(0,n,n)
+    permute <- sample.int(n)
+    for (i in 1:(n-1)) {
+      for (j in (i+1):n) {
+        tmp[permute[i],permute[j]] <- tmp[permute[j],permute[i]] <- x[i,j]
+      }
+    }
+    x <- tmp
+  }
+  
   if ( requireNamespace("igraph",quietly=TRUE) ) {
     igraph_x <- igraph::graph.adjacency(x,weighted=TRUE,mode="undirected")
     igraph_spanning_tree <- igraph::mst(igraph_x)
@@ -22,6 +79,13 @@ getSparseSpanningTree <- function(x) {
     return(cbind(i,j))
   })
   sparse_spanning_tree <- do.call(rbind,sparse_spanning_tree)
+  
+  # Sort the spanning tree to match the original ordering, if needed
+  if ( shuffle ) {
+    key <- order(permute)
+    sparse_spanning_tree[,1] <- key[sparse_spanning_tree[,1]]
+    sparse_spanning_tree[,2] <- key[sparse_spanning_tree[,2]]
+  }
   
   return(sparse_spanning_tree)
 }

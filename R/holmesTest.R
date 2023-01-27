@@ -41,23 +41,46 @@
 #' holmesTest(list(set1,set2),phangorn::RF.dist)
 #' holmesPlot(list(set1,set2),phangorn::RF.dist)
 #' }
-holmesTest <- function(x,dist.fn=NULL,labels=NULL,B=1000,returnNullDistribution=FALSE) {
+holmesTest <- function(x,
+                       dist.fn=NULL,
+                       labels=NULL,
+                       B="automatic",
+                       R="automatic",
+                       returnNullDistribution=FALSE,
+                       ...) {
+  
   tmp <- prepForHolmes(x=x,dist.fn=dist.fn,labels=labels)
   x <- tmp$x
   labels <- tmp$labels
   
-  sparse_spanning_tree <- getSparseSpanningTree(x)
+  # recover()
   
-  S_0 <- holmesTestStat(sparse_spanning_tree,labels)
-
-  S_star <- sapply(1:B,function(i){
-    holmesTestStat(sparse_spanning_tree,sample(labels))
+  all_dists <- x[upper.tri(x)]
+  ties_present <- length(unique(all_dists)) < length(all_dists)
+  
+  res <- NULL
+  sparse_spanning_trees <- list()
+  if (ties_present) {
+    warning("There are non-unique distances between trees. MST may not be unique, averaging over R = ",R," MSTs. Note that p-value may change on re-run.")
+    sparse_spanning_trees <- getSparseSpanningTreeListHolmes(x,R,labels)
+    R <- length(sparse_spanning_trees)
+  } else {
+    sparse_spanning_trees[[1]] <- getSparseSpanningTree(x,shuffle=FALSE)
+  }
+  n_spanning_trees <- length(sparse_spanning_trees)
+  
+  S_0 <- holmesTestStat(sparse_spanning_trees,labels)
+  
+  S_star <- sapply(1:B,function(b){
+    holmesTestStat(sparse_spanning_trees,sample(labels))
   })
   
   p <- sum(S_star > S_0)/B
   res <- list(
     p.value = p,
-    S_0 = S_0
+    S_0 = S_0,
+    R = R,
+    B = B
   )
   if (returnNullDistribution) {
     res$nullDistribution = S_star
@@ -70,7 +93,11 @@ holmesTest <- function(x,dist.fn=NULL,labels=NULL,B=1000,returnNullDistribution=
 #' Uses classical multidimensional scaling to plot trees in a 2D plane and shows edges connecting the minimum spanning tree.
 #' Optionally reports p-value.
 #' @export
-holmesPlot <- function(x,dist.fn=NULL,labels=NULL,B=NULL,setColors=1+(1:min(c(length(x),length(unique(labels))))),betweenColor=1) {
+holmesPlot <- function(x,dist.fn=NULL,
+                       labels=NULL,
+                       B=NULL,
+                       setColors=1+(1:min(c(length(x),length(unique(labels))))),
+                       betweenColor=1) {
   tmp <- prepForHolmes(x=x,dist.fn=dist.fn,labels=labels)
   x <- tmp$x
   labels <- as.integer(as.factor(tmp$labels))
@@ -81,7 +108,7 @@ holmesPlot <- function(x,dist.fn=NULL,labels=NULL,B=NULL,setColors=1+(1:min(c(le
     p_value <- holmesTest(x=x, dist.fn=dist.fn, labels=tmp$labels, B=B)$p.value
   }
   
-  sparse_spanning_tree <- getSparseSpanningTree(x)
+  sparse_spanning_tree <- getSparseSpanningTree(x,shuffle=TRUE)
   
   # recover()
   
@@ -146,14 +173,22 @@ prepForHolmes <- function(x,dist.fn,labels=NULL) {
 
 #' Computes test statistic for Holme's tree test from a pre-computed sparse spanning tree and a set of labels
 #' 
-#' @param sparseSpanningTree The spanning tree as a list of edges
+#' Allows a list of MSTs, for situations where the MST is not unique, in which case it averages the test statistic over these.
+#' 
+#' @param sparseSpanningTree A list of spanning trees (each provided as a list of edges)
 #' @param labels Which tree goes in which set.
 #' @return The test statistic (number of edges connecting trees within a set)
 #' @keywords internal
-holmesTestStat <- function(sparseSpanningTree,labels) {
+holmesTestStat <- function(sparseSpanningTrees,labels) {
   
-  # we've double-counted every edge by not restricting the count to i > j or j > i
-  stat2 <- sum(labels[sparseSpanningTree[,1]] == labels[sparseSpanningTree[,2]])/2
+  if (class(sparseSpanningTrees) == "matrix") {
+    sparseSpanningTrees <- list(sparseSpanningTrees)
+  }
   
-  return(stat2)
+  stats <- unlist(lapply(sparseSpanningTrees,function(spanning_tree){
+    # we've double-counted every edge by not restricting the count to i > j or j > i
+    sum(labels[spanning_tree[,1]] == labels[spanning_tree[,2]])/2
+  }))
+  
+  return(mean(stats))
 }
