@@ -3,7 +3,7 @@
 #' @param x A distance matrix
 #' @param R Either a number of MSTs to collect (to account for non-uniqueness) or "automatic" to chose the number based on the stabilization of the Holmes test statistic
 #' @param labels The labels, as in holmesTest
-#' @param rel.cutoff We stop sampling new trees when the test statistic stops fluctuating by more than this proportion
+#' @param se.cutoff For eventual use in auto-determination of number of MSTs needed.
 #' @return Vector of all edges in the spanning tree (contains both i->j and j->i for any connected values i and j)
 #' @keywords internal
 getSparseSpanningTreeListHolmes <- function(x,R,labels,se.cutoff=0.25) {
@@ -13,6 +13,7 @@ getSparseSpanningTreeListHolmes <- function(x,R,labels,se.cutoff=0.25) {
       getSparseSpanningTree(x,shuffle=TRUE)
     })
   } else if ( grepl("auto",R) ) {
+    stop("Auto-terminating is not ready for use.")
     sparse_spanning_trees <- vector("list",100)
     stats <- numeric(100)
     
@@ -52,6 +53,7 @@ getSparseSpanningTree <- function(x,shuffle=FALSE) {
   spanning_tree <- NULL
   
   # Permuting the distance matrix
+  # TODO: this is a slow step and 
   permute <- NULL
   if (shuffle) {
     n <- dim(x)[1]

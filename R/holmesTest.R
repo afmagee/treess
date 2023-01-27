@@ -44,18 +44,17 @@
 holmesTest <- function(x,
                        dist.fn=NULL,
                        labels=NULL,
-                       B="automatic",
-                       R="automatic",
+                       B=1000,
+                       R=1000,
                        returnNullDistribution=FALSE,
-                       bootstrap.se.tolerance=0.005,
                        ...) {
   
   # Check inputs before doing costly things
-  if ( (!is.numeric(B)) && (!grepl("auto",B)) ) {
+  if ( (!is.numeric(B)) ) {
     stop("Invalid input for number of bootstrap replicates B.")
   }
 
-  if ( (!is.numeric(R)) && (!grepl("auto",R)) ) {
+  if ( (!is.numeric(R)) ) {
     stop("Invalid input for number of replicate non-unique MST trees R.")
   }
   
@@ -88,7 +87,7 @@ holmesTest <- function(x,
       holmesTestStat(sparse_spanning_trees,sample(labels))
     })
   } else {
-    
+    stop("Auto-terminating is not ready for use.")
     S_star <- numeric(1000)
     S_star[1:100] <- sapply(1:100,function(b){
       holmesTestStat(sparse_spanning_trees,sample(labels))
