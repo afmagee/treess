@@ -168,10 +168,7 @@ holmesPlot <- function(x,
     }
   }
   points(y,pch=16,col=cols)
-  if ( !is.null(p_value) ) {
-    title(paste0("Permutation test p-value: ",round(p_value,3)))
-  }
-  
+
   return(NULL)
   
 }
