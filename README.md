@@ -4,7 +4,7 @@ A package for assessing the MCMC effective sample size of phylogenetic trees.
 
 Installation requires the package `devtools`:
 
-    devtools::install_bitbucket("afmagee/treess")
+    devtools::install_github("afmagee/treess")
 
 Note that while treess depends on `ape`, `coda`, and `phangorn`, it does not load any of them.
 
