@@ -4,17 +4,17 @@
 \alias{holmesTestStat}
 \title{Computes test statistic for Holme's tree test from a pre-computed sparse spanning tree and a set of labels}
 \usage{
-holmesTestStat(sparseSpanningTree, labels)
+holmesTestStat(sparseSpanningTrees, labels)
 }
 \arguments{
-\item{sparseSpanningTree}{The spanning tree as a list of edges}
-
 \item{labels}{Which tree goes in which set.}
+
+\item{sparseSpanningTree}{A list of spanning trees (each provided as a list of edges)}
 }
 \value{
 The test statistic (number of edges connecting trees within a set)
 }
 \description{
-Computes test statistic for Holme's tree test from a pre-computed sparse spanning tree and a set of labels
+Allows a list of MSTs, for situations where the MST is not unique, in which case it averages the test statistic over these.
 }
 \keyword{internal}

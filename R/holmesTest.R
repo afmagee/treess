@@ -2,20 +2,27 @@
 #' 
 #' Holmes' tree test is a permutation test of equivalence of two (or more) tree distributions.
 #' The input are sets of samples of trees, from which a minimum spanning tree is constructed to link all trees.
-#' The test statistic is the number of edges which connect trees from the same set of samples.
+#' The test statistic, S, is the number of edges which connect trees from the same set of samples.
 #' The null distribution is obtained by permuting the labels (the assignment of trees to sets of samples).
 #' 
 #' @param x Either a list of multiPhylo objects or a distance matrix for distances between trees, if the latter argument "labels" is needed.
 #' @param dist.fn Function for computing tree to tree distances, must be capable of being called on a multiPhylo. Not needed if x is a distance matrix.
 #' @param labels If x is a distance matrix, this argument assigns each column and row to a bootstrap replicate.
-#' @param B number of bootstrap replicates.
-#' @param setColor colors for treesets for plotting.
-#' @param betweenColor color to distinguish edges between sets for plotting.
+#' @param B Number of bootstrap replicates.
+#' @param R Number of non-unique MSTs sampled when MST is not unique (see details).
+#' @param setColor Colors for treesets for plotting.
+#' @param betweenColor Color to distinguish edges between sets for plotting.
 #' @return See details.
 #' @details 
-#' holmesTest returns a list with $p.value the (estimated) p-value from the permutation test, $S_0 the observed test statistic, and optionally $nullDistribution the null distribution of the test statistic obtained by permutation.
+#' holmesTest returns a list with $p.value the (estimated) p-value from the permutation test, $S_0 the observed test statistic, $B the number of bootstrap replicates used, $R the number of replicate MSTs, and optionally $nullDistribution the null distribution of the test statistic obtained by permutation.
+#' 
+#' When using a topology-only distance, the MST may not be unique (it will certainly not be unique if the same tree occurs multiple times).
+#' In this case, R MSTs are generated and the test statistic used is the average of S across the R trees.
+#' This will greatly increase the computation time required and p-values may nevertheless be unstable (but more stable than without averaging).
 #' 
 #' holmesPlot returns NULL and plots the visualization.
+#' In the case where the MST is not unique, holmesPlot samples an MST at random and plots the result based on it.
+#' 
 #' @export
 #' @references 
 #' Holmes (2005). "Statistical approach to tests involving phylogenies." In Mathematics of Evolution and Phylogeny, ed. Gascuel.
@@ -70,7 +77,8 @@ holmesTest <- function(x,
   res <- NULL
   sparse_spanning_trees <- list()
   if (ties_present) {
-    warning("There are non-unique distances between trees. MST may not be unique, averaging over R = ",R," MSTs. Note that p-value may change on re-run.")
+    warning("There are non-unique distances between trees. MST may not be unique, averaging over R = ",R,
+            " MSTs. Note that p-value may change on re-run. This may take some time, please be patient.")
     sparse_spanning_trees <- getSparseSpanningTreeListHolmes(x,R,labels)
     R <- length(sparse_spanning_trees)
   } else {
@@ -124,11 +132,10 @@ holmesTest <- function(x,
 
 #' @describeIn holmesTest
 #' Uses classical multidimensional scaling to plot trees in a 2D plane and shows edges connecting the minimum spanning tree.
-#' Optionally reports p-value.
 #' @export
-holmesPlot <- function(x,dist.fn=NULL,
+holmesPlot <- function(x,
+                       dist.fn=NULL,
                        labels=NULL,
-                       B=NULL,
                        setColors=1+(1:min(c(length(x),length(unique(labels))))),
                        betweenColor=1) {
   tmp <- prepForHolmes(x=x,dist.fn=dist.fn,labels=labels)
@@ -136,11 +143,8 @@ holmesPlot <- function(x,dist.fn=NULL,
   labels <- as.integer(as.factor(tmp$labels))
   ntrees <- tmp$ntrees
   
-  p_value <- NULL
-  if ( is.numeric(B) && B > 0 ) {
-    p_value <- holmesTest(x=x, dist.fn=dist.fn, labels=tmp$labels, B=B)$p.value
-  }
-  
+  # If the MST is unique, shuffle=TRUE makes no difference
+  # If it is not, then it samples among the non-unique MSTs
   sparse_spanning_tree <- getSparseSpanningTree(x,shuffle=TRUE)
   
   # recover()

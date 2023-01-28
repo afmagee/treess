@@ -52,19 +52,15 @@ getSparseSpanningTreeListHolmes <- function(x,R,labels,se.cutoff=0.25) {
 getSparseSpanningTree <- function(x,shuffle=FALSE) {
   spanning_tree <- NULL
   
-  # Permuting the distance matrix
-  # TODO: this is a slow step and 
+  # recover()
+  
+  # Permuting the distance matrix allows us to get different MSTs when the MST is not unique
   permute <- NULL
+  key <- NULL
   if (shuffle) {
     n <- dim(x)[1]
-    tmp <- matrix(0,n,n)
     permute <- sample.int(n)
-    for (i in 1:(n-1)) {
-      for (j in (i+1):n) {
-        tmp[permute[i],permute[j]] <- tmp[permute[j],permute[i]] <- x[i,j]
-      }
-    }
-    x <- tmp
+    x <- x[permute,permute]
   }
   
   if ( requireNamespace("igraph",quietly=TRUE) ) {
@@ -86,10 +82,13 @@ getSparseSpanningTree <- function(x,shuffle=FALSE) {
   
   # Sort the spanning tree to match the original ordering, if needed
   if ( shuffle ) {
-    key <- order(permute)
-    sparse_spanning_tree[,1] <- key[sparse_spanning_tree[,1]]
-    sparse_spanning_tree[,2] <- key[sparse_spanning_tree[,2]]
+    # sparse_spanning_tree[i,j] gives us the index in permute, k for the tree at hand
+    # we want the index, l, in the original ordering of trees
+    # because the original ordering is just 1:n, permute[k] = l
+    sparse_spanning_tree[,1] <- permute[sparse_spanning_tree[,1]]
+    sparse_spanning_tree[,2] <- permute[sparse_spanning_tree[,2]]
   }
+  row.names(sparse_spanning_tree) <- NULL
   
   return(sparse_spanning_tree)
 }
@@ -153,6 +152,8 @@ KL <- function(p,q) {
 
 expandDistanceMatrix <- function(dmat,indices) {
   # recover()
+  
+  # TODO can we not apply the same dmat[indices,indices] approach here as in permuteDistanceMatrix?
   
   # When computing the variance of the posterior for different ESS, NAs get introduced into the indices
   # This is because ESS <= n in our construction
