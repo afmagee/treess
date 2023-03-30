@@ -222,8 +222,8 @@ plotTreeIntervals <- function(x,summary="split",differences=NA,chains=c(1,2),thr
       xr <- x[[to.plot]][[chains[1]]][i,2:3]
       yr <- x[[to.plot]][[chains[2]]][i,2:3]
       
-      lines(xr,c(yc,yc),col=bar_col[cases[i]])
-      lines(c(xc,xc),yr,col=bar_col[cases[i]])
+      lines(xr,c(yc,yc),col=bar_col[i])
+      lines(c(xc,xc),yr,col=bar_col[i])
     }
   }
   
