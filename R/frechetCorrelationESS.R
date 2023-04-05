@@ -104,9 +104,139 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
   
 }
 
+subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,regularize.average.weight=1,lower.bound=TRUE,...) {
+  # recover()
+  
+  n <- length(x)
+  
+  n_per_diag <- n.per.diag # this should be a function parameter and will need to be experimented with
+  wt <- regularize.average.weight # weight of samples outside this box, this should get fed to the appropriate internal function
+  
+  # Strategy: subsample
+  #  1. think in bands along the diagonals
+  #  1.1 question of whether to spread points uniformly or to concentrate towards the topleft/bottomright where most "variance boxes" live
+  #  2. store matrix with i,j and distance (squared)
+  #  2.2 access kth diagonal with i == j + k
+  #  3. between E[d^2] bit is easy, pre-compute because will need for variances
+  #  4. variances within sub-chunks is a bit trickier
+  #  4.1 requires knowing which off-diagonals a box uses
+  #  4.2 once we know that, we can access the correct diagonal as (i == j + k) & i >= thresh
+  #  4.3 some diagonals will be empty or sparse, probably want a weighted average of points within the box and the whole diagonal
+  #  4.4 weighting scheme could treat the "global" average for the diagonal as c cells (try c = 1 to start)
+  
+  # recover()
+  
+  i_j_dist <- computeDiagonallySubsampledDistances(x,dist.fn,n.per.diag,uniform.over.matrix=TRUE)
+  
+  # Square distances, pre-computed diagonal averages  
+  d12 <- rep(-Inf,n-1)
+  for (i in 1:(n-1)) {
+    i_j_dist[[i]][,3] <- i_j_dist[[i]][,3] * i_j_dist[[i]][,3]
+    d12[i] <- mean(i_j_dist[[i]][,3])
+  }
+
+  # recover()
+
+  # Compute covariances only as far as we need to
+  cors <- numeric(n-min.nsamples-1)
+  P <- rep(NA,floor((n-min.nsamples)/2))
+  for (i in 1:(n-min.nsamples-1)) {
+    n_on_diagonal <- n - i
+
+    var1 <- var2 <- estVarFromDiagMeans(d12,n,i)
+
+    # lower bound on 2 x covariance
+    covar <- var1 + var2 - d12[i]
+    covar <- covar/2
+
+    # If either of the variances are 0, then one set of trees is all the same and the correlation is technically undefined
+    # Practically, this means there is very little variability in these trees, the sampler is mixing poorly, and we can report this with a high correlation
+    if ( var1 == 0 || var2 == 0 ) {
+      cors[i] <- 1
+    } else {
+      cors[i] <- covar/sqrt(var1*var2)
+    }
+
+    # We want to combine (0,1), (2,3), ... but we're indexing starting at 1
+    if ( i %% 2 == 1 ) {
+      if ( i > 1) {
+        P[(i+1)/2] <- cors[i] + cors[i-1]
+      } else {
+        # cors[0] is 1.0
+        P[(i+1)/2] <- cors[i] + 1.0
+      }
+      if ( P[(i+1)/2] < 0 ) {
+        break
+        # We only sum over P > 0 so we don't need further terms
+      }
+    }
+  }
+
+
+  # Smoothed P, aka P' in Vehtari et al.
+  # Remove any P we did not compute and thus do not need
+  P <- P[!is.na(P)]
+  for (i in 2:length(P)) {
+    P[i] <- min(P[i],P[i-1])
+  }
+
+  # Unless we summed over all time lags, we stopped when P[length(P)] < 0
+  k <- length(P) - 1
+  if ( P[length(P)] > 0 ) {
+    k <- length(P)
+  }
+  tau_hat <- -1 + 2 * sum(P[1:k])
+
+  # Paranoid exception handling
+  if (tau_hat < 0) {
+    tau_hat <- 1
+  }
+
+  return(n/tau_hat)
+  
+}
+
+estVarFromDiagMeans <- function(diag.means,n,i) {
+  weights <- (n-1):1 - i
+  weights[weights < 0] <- 0
+  sum(diag.means * weights)/((n-i)*(n-i-1))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Very slow, but seems to be working (along with all necessary functions it rests upon)
 # Cannot do anything but the lower bound here
-subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,regularize.average.weight=1,lower.bound=TRUE,...) {
+subsampledFrechetCorrelationESSSlow <- function(x,dist.fn,n.per.diag,min.nsamples=5,regularize.average.weight=1,lower.bound=TRUE,...) {
   # recover()
   
   n <- length(x)
@@ -126,7 +256,7 @@ subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,
   #  4.3 some diagonals will be empty or sparse, probably want a weighted average of points within the box and the whole diagonal
   #  4.4 weighting scheme could treat the "global" average for the diagonal as c cells (try c = 1 to start)
   
-  i_j_dist <- computeDiagonallySubsampledDistances(x,dist.fn,n.per.diag)
+  i_j_dist <- computeDiagonallySubsampledDistancesSlow(x,dist.fn,n.per.diag)
   i_j_dist <- i_j_dist[,-4]
   i_j_dist[,4] <- i_j_dist[,4]^2
   
@@ -143,13 +273,13 @@ subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,
   for (i in 1:(n-min.nsamples-1)) {
     n_on_diagonal <- n - i
     
-    var1 <- estimateSumFromDiagonalSubsamples(i_j_dist,
+    var1 <- estimateSumFromDiagonalSubsamplesSlow(i_j_dist,
                                               diag.means=d12,
                                               first=i+1,
                                               last=n,
                                               weight.per.point=1,
                                               weight.unsampled.average=wt)/(2*(n-i)*(n-i-1)) # extra factor of 2 because we're summing over the whole square and not an upper/lower triangular portion
-    var2 <- estimateSumFromDiagonalSubsamples(i_j_dist,
+    var2 <- estimateSumFromDiagonalSubsamplesSlow(i_j_dist,
                                               diag.means=d12,
                                               first=1,
                                               last=n-i,
@@ -205,138 +335,6 @@ subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,
   
   return(n/tau_hat)
   
-}
-
-computeDiagonallySubsampledDistances <- function(x,dist.fn,n.per.diag) {
-  n <- length(x)
-  
-  # recover()
-  
-  # A matrix containing all the pairs for which we will compute distances as (d,k) coordinates along the diagonal
-  dk <- NULL
-  
-  if (n.per.diag < length(x) - 1) {
-    
-    # # number of distances to compute: number from diagonals we subsample + number from those we fully sample
-    # n_compute <- n.per.diag * n
-    # 
-    # # ensure at least one sample in every diagonal band but weight sampling towards longer bands
-    # diag_samples <- sample(2:(n-1),size=n_compute - (n - 1),replace=TRUE,prob=((n-2):1))
-    # n_samples <- 1 + sapply(2:n,function(d){
-    #   sum(diag_samples == d)
-    # })
-    # 
-    # dk <- matrix(nrow=n_compute,ncol=2)
-    # idx <- 0
-    # for (d in 2:n) {
-    #   n_on_diagonal <- n - d + 1
-    #   subseq <- round(seq(1,n_on_diagonal,length.out=n_samples[d-1]))
-    #   indices <- idx + (1:n_on_diagonal)
-    #   dk[indices,1] <- rep(d,n_on_diagonal)
-    #   dk[indices,2] <- subseq
-    #   idx <- idx + n_on_diagonal
-    # }
-    # 
-    # idx <- n.per.diag * (last_subsampled_diagonal - 1)
-    # for (d in (last_subsampled_diagonal+1):n) {
-    #   n_on_diagonal <- n - d + 1
-    #   dk[idx+(1:n_on_diagonal),1] <- rep(d,n_on_diagonal)
-    #   dk[idx+(1:n_on_diagonal),2] <- 1:n_on_diagonal
-    #   idx <- idx + n_on_diagonal
-    # }
-    
-    # Uniformly over each diagonal
-    # Find the diagonal beyond which we compute all distances, not a subsampled set
-    last_subsampled_diagonal <- n - n.per.diag
-
-    # number of distances to compute: number from diagonals we subsample + number from those we fully sample
-    n_compute <- n.per.diag * (last_subsampled_diagonal - 1) + sum(n.per.diag:1)
-
-    dk <- matrix(nrow=n_compute,ncol=2)
-    for (d in 2:last_subsampled_diagonal) {
-      n_on_diagonal <- n - d + 1
-      subseq <- round(seq(1,n_on_diagonal,length.out=n.per.diag))
-      dk[((d-2)*n.per.diag+1):((d-1)*n.per.diag),1] <- rep(d,n.per.diag)
-      dk[((d-2)*n.per.diag+1):((d-1)*n.per.diag),2] <- subseq
-    }
-
-    idx <- n.per.diag * (last_subsampled_diagonal - 1)
-    for (d in (last_subsampled_diagonal+1):n) {
-      n_on_diagonal <- n - d + 1
-      dk[idx+(1:n_on_diagonal),1] <- rep(d,n_on_diagonal)
-      dk[idx+(1:n_on_diagonal),2] <- 1:n_on_diagonal
-      idx <- idx + n_on_diagonal
-    }
-  } else {
-    n_compute <- choose(n,2)
-    dk <- matrix(nrow=n_compute,ncol=2)
-    idx <- 0
-    for (d in 2:n) {
-      n_on_diagonal <- n - d + 1
-      dk[idx+(1:n_on_diagonal),1] <- rep(d,n_on_diagonal)
-      dk[idx+(1:n_on_diagonal),2] <- 1:n_on_diagonal
-      idx <- idx + n_on_diagonal
-    }
-  }
-  
-  # (i,j) pairs for which we will compute distances
-  ij <- dk2ij(dk[,1],dk[,2])
-  
-  dists <- getSubsampledDistanceMatrix(x,dist.fn,ij)
-  
-  return(cbind(ij,dk,dists))
-  
-}
-
-# Finds the index of the kth element on the dth diagonal
-# The first diagonal is the actual diagonal, d such that j = i
-# Diagonals increase into the upper right corner, the second is d such that j = i + 1, the last is (1,n)
-dk2ij <- function(d,k) {
-    # c(k,k+d-1)
-  # apply(cbind(d,k),1,function(dk){
-  #   c(dk[2], dk[2] + dk[1] - 1)
-  # })
-  unname(cbind(k,k+d-1))
-}
-
-# The reverse mapping of dk2ij
-ij2dk <- function(i,j) {
-  # c(j-i+1,i)
-  # apply(cbind(i,j),1,function(ij){
-  #   c(ij[2] - ij[1] + 1, ij[1])
-  # })
-  unname(cbind(j-i+1,i))
-}
-
-estimateSumFromDiagonalSubsamples <- function(x,
-                                              diag.means,
-                                              first,
-                                              last,
-                                              weight.per.point=1,
-                                              weight.unsampled.average=1) {
-  i_j_dist <- x
-
-  # Size of this submatrix
-  m <- last - first + 1
-  
-  # recover()
-  is_in_box <- i_j_dist[,1] >= first & i_j_dist[,1] <= last & i_j_dist[,2] >= first & i_j_dist[,2] <= last
-  i_j_dist <- i_j_dist[is_in_box,]
-  summand <- sapply(2:m,function(d){
-    n_on_diag <- m - (d - 1)
-    to_use <- i_j_dist[,3] == d
-    n_in_box <- sum(to_use)
-    if (n_in_box > 0) {
-      sample_mean <- mean(i_j_dist[to_use,4])
-    } else {
-      sample_mean <- 0
-    }
-    w_in <- n_in_box * weight.per.point
-    w_out <- weight.unsampled.average
-    w_tot <- w_in + w_out
-    n_on_diag * (sample_mean * w_in/w_tot + diag.means[d-1] * w_out/w_tot)
-  })
-  return(2 * sum(summand))
 }
 
 # # Cannot do anything but the lower bound here
