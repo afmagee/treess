@@ -1,7 +1,7 @@
 #' Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
 #'
 #' @param trees All trees in the MCMC chain, either as trees or as RF coordinates.
-#' @references Vats, Dootika, and Christina Knudson. "Revisiting the Gelman-Rubin diagnostic." arXiv preprint arXiv:1812.09384 (2018).
+#' @references Vats and Knudson (2021). "Revisiting the Gelman-Rubin diagnostic." Statistical Science, 36(4), 518-529.
 #' @keywords internal
 splitFrequencyESS <- function(trees,...) {
   # recover()
