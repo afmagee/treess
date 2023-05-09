@@ -104,36 +104,46 @@ frechetCorrelationESS <- function(dmat,min.nsamples=5,lower.bound=TRUE,...) {
   
 }
 
-subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,regularize.average.weight=1,lower.bound=TRUE,...) {
+subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,regularize.average.weight=1,observed.point.weight=1,lower.bound=TRUE,...) {
   # recover()
   
   n <- length(x)
   
   n_per_diag <- n.per.diag # this should be a function parameter and will need to be experimented with
   wt <- regularize.average.weight # weight of samples outside this box, this should get fed to the appropriate internal function
-  
-  # Strategy: subsample
-  #  1. think in bands along the diagonals
-  #  1.1 question of whether to spread points uniformly or to concentrate towards the topleft/bottomright where most "variance boxes" live
-  #  2. store matrix with i,j and distance (squared)
-  #  2.2 access kth diagonal with i == j + k
-  #  3. between E[d^2] bit is easy, pre-compute because will need for variances
-  #  4. variances within sub-chunks is a bit trickier
-  #  4.1 requires knowing which off-diagonals a box uses
-  #  4.2 once we know that, we can access the correct diagonal as (i == j + k) & i >= thresh
-  #  4.3 some diagonals will be empty or sparse, probably want a weighted average of points within the box and the whole diagonal
-  #  4.4 weighting scheme could treat the "global" average for the diagonal as c cells (try c = 1 to start)
+
+#   # Strategy: subsample
+#   #  1. think in bands along the diagonals
+#   #  1.1 question of whether to spread points uniformly or to concentrate towards the topleft/bottomright where most "variance boxes" live
+#   #  2. store matrix with i,j and distance (squared)
+#   #  2.2 access kth diagonal with i == j + k
+#   #  3. between E[d^2] bit is easy, pre-compute because will need for variances
+#   #  4. variances within sub-chunks is a bit trickier
+#   #  4.1 requires knowing which off-diagonals a box uses
+#   #  4.2 once we know that, we can access the correct diagonal as (i == j + k) & i >= thresh
+#   #  4.3 some diagonals will be empty or sparse, probably want a weighted average of points within the box and the whole diagonal
+#   #  4.4 weighting scheme could treat the "global" average for the diagonal as c cells (try c = 1 to start)
   
   # recover()
   
-  i_j_dist <- computeDiagonallySubsampledDistances(x,dist.fn,n.per.diag,uniform.over.matrix=TRUE)
+  i_j_dist <- computeDiagonallySubsampledDistances(x,dist.fn,n.per.diag,same.n.per.diag=FALSE)
+  i_j_dist <- lapply(i_j_dist,function(ijd){
+    ijd[,3] <- ijd[,3] * ijd[,3]
+    return(ijd)
+  })
   
-  # Square distances, pre-computed diagonal averages  
-  d12 <- rep(-Inf,n-1)
-  for (i in 1:(n-1)) {
-    i_j_dist[[i]][,3] <- i_j_dist[[i]][,3] * i_j_dist[[i]][,3]
-    d12[i] <- mean(i_j_dist[[i]][,3])
-  }
+  tmp <- setupVarianceComponents(i_j_dist,n)
+  i_j_dist <- tmp$subsampled.dists
+  vc_ul <- tmp$var.components
+  vc_lr <- tmp$var.components
+  d12 <- vc_ul$means
+  
+  #   # Square distances, pre-computed diagonal averages  
+  # d12 <- rep(-Inf,n-1)
+  # for (i in 1:(n-1)) {
+  #   i_j_dist[[i]][,3] <- i_j_dist[[i]][,3] * i_j_dist[[i]][,3]
+  #   d12[i] <- mean(i_j_dist[[i]][,3])
+  # }
 
   # recover()
 
@@ -141,10 +151,13 @@ subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,
   cors <- numeric(n-min.nsamples-1)
   P <- rep(NA,floor((n-min.nsamples)/2))
   for (i in 1:(n-min.nsamples-1)) {
-    n_on_diagonal <- n - i
-
-    var1 <- var2 <- estVarFromDiagMeans(d12,n,i)
-
+    vc_ul <- updateUpperLeftVariance(vc_ul,i_j_dist,n=n,idx=i)
+    vc_lr <- updateLowerRightVariance(vc_lr,i_j_dist,n=n,idx=i)
+    
+    # The variances computed are wrong except in the case where observed.point.weight == 0
+    var1 <- estimateVarFromComponents(var.components=vc_ul,n=n,i=i,weight.per.point=observed.point.weight,weight.unsampled.average=regularize.average.weight)
+    var2 <- estimateVarFromComponents(var.components=vc_lr,n=n,i=i,weight.per.point=observed.point.weight,weight.unsampled.average=regularize.average.weight)
+    
     # lower bound on 2 x covariance
     covar <- var1 + var2 - d12[i]
     covar <- covar/2
@@ -195,41 +208,6 @@ subsampledFrechetCorrelationESS <- function(x,dist.fn,n.per.diag,min.nsamples=5,
   return(n/tau_hat)
   
 }
-
-estVarFromDiagMeans <- function(diag.means,n,i) {
-  weights <- (n-1):1 - i
-  weights[weights < 0] <- 0
-  sum(diag.means * weights)/((n-i)*(n-i-1))
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

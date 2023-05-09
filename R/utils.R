@@ -1,3 +1,18 @@
+# Checks compatibility of rooting of trees with whether user has specified they should be treated as rooted or not
+# Unroots trees if needed, throws error if needed, throws warning if needed
+checkRootedOption <- function(trees,rooted) {
+  if ( any(ape::is.rooted.multiPhylo(trees)) ) {
+    if ( !rooted ) {
+      warning("Counting splits on rooted trees, instead of clades.")
+      trees <- ape::unroot.multiPhylo(trees)
+    } 
+  } else if ( rooted ) {
+    stop("Trees are unrooted but rooted=TRUE")
+  }
+  return(trees)
+}
+
+
 #' Gets a sparse representation of a spanning tree from a distance matrix.
 #' 
 #' @param x A distance matrix

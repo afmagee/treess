@@ -108,20 +108,24 @@ estimateSumFromDiagonalSubsamples <- function(x,
 
 #' Compute subsample of distances from a distance matrix.
 #' 
+#' Spreads out roughly n.per.diag * length(x) samples along the diagonals of the matrix.
+#' These may either be distributed uniformly across the diagonals, or such that there are more samples on the longer diagonals.
+#' 
 #' @param x The values
 #' @param dist.fn A function which can be called dist.fn(x[[i]],x[[j]])
 #' @param n.per.diag The number of samples to take on each diagonal band
-#' @param uniform.over.matrix If FALSE, each diagonal is sampled equally, if TRUE samples are dispersed over the matrix more uniformly
+#' @param same.n.per.diag If FALSE, each diagonal is sampled equally, if TRUE samples are dispersed over the matrix more uniformly
+#' @param max.diag If NA, we compute every diagonal, otherwise we stop at this value.
 #' @return List of matrices, for the 2nd through nth diagonal band (named accordingly), each a matrix. Matrix columns are row, column, distance.
 #' @keywords internal
-computeDiagonallySubsampledDistances <- function(x,dist.fn,n.per.diag,uniform.over.matrix=FALSE) {
+computeDiagonallySubsampledDistances <- function(x,dist.fn,n.per.diag,same.n.per.diag=TRUE,max.diag=NA) {
   n <- length(x)
   
   # recover()
   
   n_compute_per_diag <- NULL
   if (n.per.diag < length(x) - 1) {
-    if ( !uniform.over.matrix ) {
+    if ( same.n.per.diag ) {
       # Uniformly over each diagonal
       # Find the diagonal beyond which we compute all distances, not a subsampled set
       last_subsampled_diagonal <- n - n.per.diag
@@ -129,18 +133,27 @@ computeDiagonallySubsampledDistances <- function(x,dist.fn,n.per.diag,uniform.ov
       # number of distances to compute on each diagonal
       n_compute_per_diag <- c(rep(n.per.diag,(last_subsampled_diagonal-1)),n.per.diag:1)
     } else {
+      # Keep first row and last column
+      # Past that, distribute the samples proportionate to the size of the diagonal
       n_compute <- n.per.diag * n
       
-      w <- (n-2):0
+      w <- c((n-3):0,0)
       w <- w/sum(w)
-      w <- round(n.per.diag * (n - 1) * w)
-      n_compute_per_diag <- 1 + w
+      w <- round(n.per.diag * (n - 2) * w)
+      n_compute_per_diag <- 2 + w
+      n_compute_per_diag <- pmin(n_compute_per_diag,(n-1):1)
     }
   } else {
     n_compute_per_diag <- (n-1):1
   }
+  # recover()
   
-  res <- lapply(1:(n-1),function(i){
+  stop_at <- n - 1
+  if ( !is.na(max.diag) && max.diag < n - 1 ) {
+    stop_at <- max.diag
+  }
+  
+  res <- lapply(1:stop_at,function(i){
     n_on_diagonal <- n - i
     d <- i + 1
     idx <- round(seq(1,n_on_diagonal,length.out=n_compute_per_diag[i]))
@@ -149,10 +162,97 @@ computeDiagonallySubsampledDistances <- function(x,dist.fn,n.per.diag,uniform.ov
     return(cbind(ij,dists))
   })
   
-  names(res) <- 2:n
+  names(res) <- 2:(stop_at + 1)
 
   return(res)
 }
+
+setupVarianceComponents <- function(subsampled_dists,n) {
+  # recover()
+  diag_components <- list()
+  diag_components$contributes <- rep(TRUE,n-1)
+  diag_components$first_contributing_row <- rep(1,n-1)
+  diag_components$last_contributing_row <- unlist(lapply(subsampled_dists,function(x){dim(x)[1]}))
+  diag_components$n_contributing <- diag_components$last_contributing_row
+  diag_components$means <- rep(0,n-1)
+  diag_components$active_means <- rep(0,n-1)
+  for (i in 1:(n-1)) {
+    d <- i + 1
+    diag_components$means[i] <- mean(subsampled_dists[[i]][,3])
+  }
+  diag_components$active_means <- diag_components$means
+  return(list(var.components=diag_components,subsampled.dists=subsampled_dists))
+}
+
+updateUpperLeftVariance <- function(var.components,subsampled_dists,n,idx) {
+  # recover()
+  last_used_column <- n - idx
+  var.components$contributes[n-idx] <- FALSE
+  for (i in 1:(n-idx)) {
+    max_column <- subsampled_dists[[i]][var.components$last_contributing_row[i],2]
+    if ( max_column > last_used_column ) {
+      # Update mean of currently active points
+      var.components$active_means[i] <- (var.components$n_contributing[i] * var.components$active_means[i] - 
+                                           subsampled_dists[[i]][var.components$last_contributing_row[i],3])/(var.components$n_contributing[i] - 1)
+      # Clean up
+      var.components$last_contributing_row[i] <- var.components$last_contributing_row[i] - 1
+      var.components$n_contributing[i] <- var.components$n_contributing[i] - 1
+    }
+  }
+  if (any((!var.components$contributes) & (var.components$n_contributing > 0))) {stop("severe error")}
+  return(var.components)
+}
+
+updateLowerRightVariance <- function(var.components,subsampled_dists,n,idx) {
+  # recover()
+  first_used_row <- idx+1
+  var.components$contributes[n-idx] <- FALSE
+  for (i in 1:(n-idx)) {
+    min_row <- subsampled_dists[[i]][var.components$first_contributing_row[i],1]
+    if ( min_row < first_used_row ) {
+      # Update mean of currently active points
+      var.components$active_means[i] <- (var.components$n_contributing[i] * var.components$active_means[i] - 
+                                           subsampled_dists[[i]][var.components$first_contributing_row[i],3])/
+                                          (var.components$n_contributing[i] - 1)
+      # Clean up
+      var.components$first_contributing_row[i] <- var.components$first_contributing_row[i] + 1
+      var.components$n_contributing[i] <- var.components$n_contributing[i] - 1
+    }
+  }
+  if (any((!var.components$contributes) & (var.components$n_contributing > 0))) {stop("severe error")}
+  return(var.components)
+}
+
+estimateVarFromComponents <- function(var.components,
+                                      n,
+                                      i,
+                                      weight.per.point=1,
+                                      weight.unsampled.average=1) {
+  
+  # recover()
+  
+  if (weight.per.point > 0) {
+    w_in <- var.components$n_contributing * weight.per.point
+    w_out <- weight.unsampled.average
+    w_tot <- w_in + w_out
+    
+    n_on_diag <- (n-1):1 - i
+    n_on_diag[n_on_diag < 0] <- 0
+    summand <- n_on_diag * (var.components$active_means * w_in/w_tot + var.components$means * w_out/w_tot)
+    
+    return(sum(summand[var.components$n_contributing > 0])/((n-i)*(n-i-1)))
+  } else {
+    estVarFromDiagMeans(var.components$means,n,i)
+  }
+}
+ 
+
+estVarFromDiagMeans <- function(diag.means,n,i) {
+  weights <- (n-1):1 - i
+  weights[weights < 0] <- 0
+  sum(diag.means * weights)/((n-i)*(n-i-1))
+}
+  
 
 
 
