@@ -14,7 +14,6 @@ test_that("Compare computed ESS values to cached values.", {
   # Check all ESS methods
   for (i in 1:dim(ess)[1]) {
     ess_method <- rownames(precomputed)[i]
-    # expect_equal(precomputed[i,],ess[i,],tolerance=1e-10,label=paste0("One or more ESS values computed using ",ess_method," does not match expectation. precomputed[",ess_method,",]"),expected.label=paste0("ess[",ess_method,",]"))
-    expect_equal(precomputed[i,],ess[i,],tolerance=1e-10,label=paste0("Stored ESS values computed using ",ess_method),expected.label=paste0("newly computed ESS values using ",ess_method))
+    expect_equal(ess[i,],precomputed[i,],tolerance=1e-10,label=paste0("Newly computed ESS values computed using ",ess_method),expected.label=paste0("stored ESS values using ",ess_method))
   }
 })

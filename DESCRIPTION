@@ -2,13 +2,13 @@ Package: treess
 Title: Tree Convergence Diagnostics
 Version: 1.0.1
 Author: Andrew Magee
-Maintainer: Andrew Magee <afmagee@uw.edu>
+Maintainer: Andrew Magee <afmagee@ucla.edu>
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0)
 Imports: ape, coda, phangorn
 Description: Effective sample size measures and convergence tests for phylogenetic posterior distributions.
 License: GPL-3
-Suggests: knitr, igraph, DescTools, rmutil
+Suggests: knitr, igraph, DescTools, rmutil, testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.2.1
