@@ -2,9 +2,9 @@
 % Please edit documentation in R/countTrees.R
 \name{countTrees}
 \alias{countTrees}
-\title{Counts occurences of each tree in a set of trees, returns unique trees and their counts}
+\title{Counts occurrences of each tree in a set of trees, returns unique trees and their counts}
 \usage{
-countTrees(trees)
+countTrees(trees, rooted = FALSE)
 }
 \arguments{
 \item{trees}{A multiPhylo object or list of phylo objects}
@@ -13,10 +13,7 @@ countTrees(trees)
 A list. $trees contains all unique topologies, and $counts their counts
 }
 \description{
-Counts occurences of each tree in a set of trees, returns unique trees and their counts
-}
-\details{
-Allowable methods are "pseudoPSRF", "totalDistancePSRF", "foldedRankMedioidPSRF", and "medianDistanceWilcoxTest"
+Counts occurrences of each tree in a set of trees, returns unique trees and their counts
 }
 \examples{
 countTrees(rmtree(100,10))
