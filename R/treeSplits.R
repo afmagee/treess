@@ -5,15 +5,11 @@
 #'
 #' @param trees list of trees or multiPhylo object
 #' @param rooted For rooted trees, if rooted=TRUE, clades are considered rather than splits. Otherwise trees are treated as unrooted.
-#' @param return.names Should we return the taxa names?
 #' @param ref Advanced option. Allows access to ref argument of \link{ape::.compressTipLabel}, so as to make splits/clades comparable across calls to different sets of trees on the same taxa.
-#' @return Output: a list, see details
-#' @details If return.names=TRUE, the list has two elements: $splits is a list where each element is all the splits(/clades) in a tree, and $taxa is the taxa ordered to match the splits. 
-#' If return.names=FALSE, the returned list is simply the contents of $splits.
-#' In the splits, the taxa are numbered (as in ape::prop.part) 
+#' @return Output an object of class perTreeSplits (a list of splits in each tree with attributes for the taxon labels and whether the tree is considered rooted or not).
 #' @export
 #' @seealso \link{splitProbs}, \link{nSplits}, \link{ape::prop.part}
-perTreeSplits <- function(trees,rooted=FALSE,return.names=FALSE,ref=NULL) {
+perTreeSplits <- function(trees,rooted=FALSE,ref=NULL) {
   # recover()
   
   # We use rooted later assuming it behaves as 0 for FALSE, 1 for TRUE, so we check this now
@@ -78,7 +74,7 @@ perTreeSplits <- function(trees,rooted=FALSE,return.names=FALSE,ref=NULL) {
 #' @param tree.splits output of perTreeSplits.
 #' @param range optional argument to define which trees to compute probabilities for, defaults to all trees.
 #' @param return.names should we return the taxa names?
-#' @return Mamed vector of split (or clade) probabilities.
+#' @return Named vector of split (or clade) probabilities.
 #' @export
 #' @seealso \link{perTreeSplits}
 splitProbs <- function(tree.splits,range=NULL) {
@@ -91,11 +87,24 @@ splitProbs <- function(tree.splits,range=NULL) {
   splitFrechetMean(tree.splits)
 }
 
+#' Number of unique splits in a collection of \link{perTreeSplits}.
+#'
+#' @param tree.splits output of perTreeSplits.
+#' @return Number of unique splits.
+#' @export
 nSplits <- function(tree.splits) {
   tree.splits <- unclass(tree.splits)
   length(unique(unlist(tree.splits)))
 }
 
+#' Split probabilities from collections of splits.
+#'
+#' Internal, optionless, error-checking-free version of \link{splitProbs}.
+#'
+#' @param tree.splits output of perTreeSplits.
+#' @return Named vector of split (or clade) probabilities.
+#' @keywords internal
+#' @seealso \link{splitProbs}, \link{perTreeSplits}
 splitFrechetMean <- function(tree.splits) {
   all_splits <- unlist(unclass(tree.splits))
   names(all_splits) <- NULL
@@ -105,7 +114,47 @@ splitFrechetMean <- function(tree.splits) {
   return(res)
 }
 
-splitFrechetGrandMean <- function(mean.list,return.ssq=FALSE,return.sdsf=FALSE) {
+#' Split Frechet variance from collections of splits.
+#'
+#' @param tree.splits output of perTreeSplits.
+#' @param mean output of splitFrechetMean
+#' @param bessel Should Bessel correction (divide by n-1 not n) be used? Default TRUE
+#' @return Named vector of split (or clade) probabilities.
+#' @details This function interchanges the order of summation.
+#' The Frechet variance is the (average) squared deviation from each split vector to the mean.
+#' Assuming all splits are collected into an nTrees x nSplits matrix X, this is sum_i sum_j (x_ij - mu_j)^2.
+#' By interchanging the order of summation, the problem becomes a sum of variances of vectors of Bernoulli trials.
+#' Thus, the Frechet split variance can be obtained directly from the mean and the number of trees.
+#' @keywords internal
+#' @seealso \link{splitProbs}, \link{perTreeSplits}, \link{splitFrechetMean}.
+splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
+  # recover()
+  class(tree.splits) <- NULL
+  p <- 0
+  n <- length(tree.splits)
+  if ( is.numeric(mean) ) {
+    p <- mean
+  } else {
+    p <- splitFrechetMean(tree.splits)
+  }
+  
+  summand <- length(tree.splits) * p * (1 - p)
+  
+  return((sum(summand))/(length(tree.splits)-bessel))
+}
+
+#' Useful quantities from collections of split Frechet means.
+#'
+#' Computes the grand mean from a collection of split Frechet means.
+#' Can also return the sum of squared deviations to that grand mean and standard deviations of split frequencies.
+#' Assumes equal weighting!
+#'
+#' @param mean.list list of output of \link{splitFrechetMean} or \link{splitProbs}.
+#' @return List with grand mean ($mean), and optionally sum of squared deviations to the grand mean ($ssq) 
+#' and optionally the standard deviations of all split frequencies.
+#' @keywords internal
+#' @seealso \link{splitProbs}, \link{perTreeSplits}
+perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,return.sdsf=FALSE) {
   # recover()
   
   all_split_names <- unique(unlist(lapply(mean.list,names)))
@@ -135,61 +184,43 @@ splitFrechetGrandMean <- function(mean.list,return.ssq=FALSE,return.sdsf=FALSE) 
   
 }
 
-# We can interchange the order of summation since we're dealing with squared quantities
-# This allows us to avoid matching splits more than needed
-splitFrechetVarianceBinomial <- function(tree.splits,mean=NULL,bessel=TRUE) {
-  # recover()
-  class(tree.splits) <- NULL
-  p <- 0
-  n <- length(tree.splits)
-  if ( is.numeric(mean) ) {
-    p <- mean
-  } else {
-    p <- splitFrechetMean(tree.splits)
-  }
-  
-  summand <- length(tree.splits) * p * (1 - p)
-  
-  return((sum(summand))/(length(tree.splits)-bessel))
-}
-
-splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
-  # recover()
-  m <- 0
-  n <- length(tree.splits)
-  if ( is.numeric(mean) ) {
-    m <- mean
-  } else {
-    m <- splitFrechetMean(tree.splits)
-  }
-  
-  # We make use of the following identity, true for any j in 1:length(x)
-  # sum((x - mean(x))^2) = sum((x - x[j])^2) - n*(x[j]^2 - mean(x)^2) - 2*n*mean(x)*(mean(x)-x[j])
-  # This decomposes additively, so we can mix splitwise and treewise evalutations
-  # The first component is all distances to the splits in reference tree j
-  summand1 <- sapply(2:length(tree.splits),function(i){
-    length(setdiff(tree.splits[[i]],tree.splits[[1]])) + length(setdiff(tree.splits[[1]],tree.splits[[i]]))
-  })
-  
-  # The rest of the requisite sumis computed splitwise between the reference tree and the mean
-  ref_tree_expanded <- numeric(length(m))
-  ref_tree_expanded[match(tree.splits[[1]],names(m))] <- 1
-  
-  summand2 <- - n * (ref_tree_expanded^2 - m^2) - 2 * n * m * (m - ref_tree_expanded)
-  
-  return((sum(summand1)+sum(summand2))/(length(tree.splits)-bessel))
-  
-  # summand <- sapply(1:length(tree.splits),function(i){
-  #   seen <- names(m) %in% tree.splits[[i]]
-  #   unseen_sum_sq <- sum(m[!seen]^2)
-  #   # key <- match(tree.splits[[i]],names(m))
-  #   seen_sum_sq <- sum((1 - m[seen])^2)
-  #   return(seen_sum_sq + unseen_sum_sq)
-  # })
-  #
-  # return(sum(summand)/(length(tree.splits)-bessel))
-  
-}
+# splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
+#   # recover()
+#   m <- 0
+#   n <- length(tree.splits)
+#   if ( is.numeric(mean) ) {
+#     m <- mean
+#   } else {
+#     m <- splitFrechetMean(tree.splits)
+#   }
+#   
+#   # We make use of the following identity, true for any j in 1:length(x)
+#   # sum((x - mean(x))^2) = sum((x - x[j])^2) - n*(x[j]^2 - mean(x)^2) - 2*n*mean(x)*(mean(x)-x[j])
+#   # This decomposes additively, so we can mix splitwise and treewise evalutations
+#   # The first component is all distances to the splits in reference tree j
+#   summand1 <- sapply(2:length(tree.splits),function(i){
+#     length(setdiff(tree.splits[[i]],tree.splits[[1]])) + length(setdiff(tree.splits[[1]],tree.splits[[i]]))
+#   })
+#   
+#   # The rest of the requisite sumis computed splitwise between the reference tree and the mean
+#   ref_tree_expanded <- numeric(length(m))
+#   ref_tree_expanded[match(tree.splits[[1]],names(m))] <- 1
+#   
+#   summand2 <- - n * (ref_tree_expanded^2 - m^2) - 2 * n * m * (m - ref_tree_expanded)
+#   
+#   return((sum(summand1)+sum(summand2))/(length(tree.splits)-bessel))
+#   
+#   # summand <- sapply(1:length(tree.splits),function(i){
+#   #   seen <- names(m) %in% tree.splits[[i]]
+#   #   unseen_sum_sq <- sum(m[!seen]^2)
+#   #   # key <- match(tree.splits[[i]],names(m))
+#   #   seen_sum_sq <- sum((1 - m[seen])^2)
+#   #   return(seen_sum_sq + unseen_sum_sq)
+#   # })
+#   #
+#   # return(sum(summand)/(length(tree.splits)-bessel))
+#   
+# }
 
 # # Not nearly as efficient as the unweighted mean!
 # # Here mainly for completeness
@@ -264,14 +295,17 @@ splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
 # Functions to make perTreeSplits a simple class
 ###############
 # should maybe allow conversion to prop.part class?
+#' @export
 print.perTreeSplits <- function(x,...) {
   cat(length(x), "phylogenies processed into",ifelse(attr(x,"rooted"),"clades","splits"))
 }
 
+#' @export
 print.treeSplits <- function(x,...) {
   cat("A phylogeny processed into",ifelse(attr(x,"rooted"),"clades","splits"))
 }
 
+#' @export
 "[[.perTreeSplits" <- function(x, i) {
   rooted <- attr(x,"rooted")
   labels <- attr(x,"labels")
@@ -283,10 +317,12 @@ print.treeSplits <- function(x,...) {
   return(s)
 }
 
+#' @export
 `$.perTreeSplits` <- function(x, name) {
   x[[name]]
 }
 
+#' @export
 "[.perTreeSplits" <- function(x, i) {
   rooted <- attr(x,"rooted")
   labels <- attr(x,"labels")
@@ -298,12 +334,14 @@ print.treeSplits <- function(x,...) {
   return(s)
 }
 
+#' @export
 str.perTreeSplits <- function(object,...)
 {
   cat("Object of class \"perTreeSplits\"\n")
   str(unclass(object),...)
 }
 
+#' @export
 c.perTreeSplits <- function(...,recursive=FALSE) {
   res <- list(...)
   classes <- lapply(res,class)
