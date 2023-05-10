@@ -1,12 +1,14 @@
-#' Counts occurences of each tree in a set of trees, returns unique trees and their counts
+#' Counts occurrences of each tree in a set of trees, returns unique trees and their counts
 #'
 #' @param trees A multiPhylo object or list of phylo objects
-#' @details Allowable methods are "pseudoPSRF", "totalDistancePSRF", "foldedRankMedioidPSRF", and "medianDistanceWilcoxTest"
 #' @return A list. $trees contains all unique topologies, and $counts their counts
 #' @export
 #' @examples
 #' countTrees(rmtree(100,10))
 countTrees <- function(trees) {
+  if ( class(trees) != "multiPhylo" || (class(trees) == "list" && all(sapply(trees,class) == "phylo")) ) {
+    stop("Invalid input.")
+  }
   # recover()
   remaining_trees <- trees
   
