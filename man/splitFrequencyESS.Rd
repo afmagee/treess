@@ -13,6 +13,6 @@ splitFrequencyESS(trees, ...)
 Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
 }
 \references{
-Vats, Dootika, and Christina Knudson. "Revisiting the Gelman-Rubin diagnostic." arXiv preprint arXiv:1812.09384 (2018).
+Vats and Knudson (2021). "Revisiting the Gelman-Rubin diagnostic." Statistical Science, 36(4), 518-529.
 }
 \keyword{internal}
