@@ -178,17 +178,15 @@ ASDSFPermutationTest <- function(coords,ngen,nchains,min.split.freq,nrep=500,...
 pseudoPSRF <- function(dmat,ngen,nchains,...) {
   # recover()
   
-  all_psrf <- lapply(1:dim(dmat)[1],function(idx) {
+  all_psrf <- sapply(1:dim(dmat)[1],function(idx) {
     X <- dmat[,idx]
     X_mcmc <- lapply(1:nchains,function(i){
       coda::as.mcmc(X[((i-1)*ngen+1):(i*ngen)])
     })
-    coda::gelman.diag(X_mcmc)
+    as.numeric(coda::gelman.diag(X_mcmc)$psrf[1,1])
   })
   
-  # find maximum of PSRF point estimates, return that PSRF object
-  point_ests <- unlist(lapply(all_psrf,function(psrf){psrf$psrf[1,1]}))
-  max_index <- which.max(point_ests)
+  max_index <- which.max(all_psrf)
   
   return(all_psrf[[max_index]])
 }

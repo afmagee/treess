@@ -11,7 +11,7 @@ approximateESS(dmat, max.approximateESS.timelag = 100, alpha = 0.05, ...)
 
 \item{max.approximateESS.timelag}{The maximum time lag for computing jump distances}
 
-\item{alpha}{The cutoff proportion of the asymptoted used to estimate the average pairwise squared distance.}
+\item{alpha}{The cutoff proportion of the asymptote used to estimate the average pairwise squared distance.}
 }
 \description{
 Calculates the approximate ESS of Lanfear et al. (2015).

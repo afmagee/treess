@@ -1,3 +1,23 @@
+# For block permutation tests
+block.permute <- function(x,b) {
+  if (b == 1) {
+    return(sample(x))
+  } else {
+    n <- length(x)
+    n.blocks <- floor(n/b)
+    first.cut <- sample.int(b,1)
+    cuts <- c(0,first.cut,first.cut + b * (1:(n.blocks-1)))
+    if (cuts[length(cuts)] != n) {
+      cuts <- c(cuts,n)
+    }
+    blocks <- lapply(1:(length(cuts)-1),function(i){
+      (cuts[i]+1):(cuts[i+1])
+    })
+    blocks <- blocks[sample.int(length(blocks))]
+    return(x[unlist(blocks)])
+  }
+}
+
 # Checks compatibility of rooting of trees with whether user has specified they should be treated as rooted or not
 # Unroots trees if needed, throws error if needed, throws warning if needed
 checkRootedOption <- function(trees,rooted) {

@@ -54,6 +54,7 @@ holmesTest <- function(x,
                        B=1000,
                        R=1000,
                        returnNullDistribution=FALSE,
+                       block.bootstrap=FALSE,
                        ...) {
   
   # Check inputs before doing costly things
@@ -69,6 +70,10 @@ holmesTest <- function(x,
   x <- tmp$x
   labels <- tmp$labels
   
+  block.size <- 1L
+  if (block.bootstrap) {
+    block.size <- floor(sqrt(length(labels)))
+  }
   # recover()
   
   all_dists <- x[upper.tri(x)]
@@ -92,13 +97,13 @@ holmesTest <- function(x,
   S_star <- numeric()
   if ( is.numeric(B) ) {
     S_star <- sapply(1:B,function(b){
-      holmesTestStat(sparse_spanning_trees,sample(labels))
+      holmesTestStat(sparse_spanning_trees,block.permute(labels,block.size))
     })
   } else {
     stop("Auto-terminating is not ready for use.")
     S_star <- numeric(1000)
     S_star[1:100] <- sapply(1:100,function(b){
-      holmesTestStat(sparse_spanning_trees,sample(labels))
+      holmesTestStat(sparse_spanning_trees,block.permute(labels,block.size))
     })
     
     idx <- 100
@@ -109,7 +114,7 @@ holmesTest <- function(x,
       if ( idx > length(S_star) ) {
         S_star <- c(S_star,vector("numeric",1000))
       }
-      S_star[idx] <- holmesTestStat(sparse_spanning_trees,sample(labels))
+      S_star[idx] <- holmesTestStat(sparse_spanning_trees,block.permute(labels,block.size))
       se <- sd(S_star[1:idx] > S_0)/sqrt(idx)
     }
     B <- idx

@@ -2,8 +2,7 @@
 % Please edit documentation in R/pseudoESS.R
 \name{pseudoESS}
 \alias{pseudoESS}
-\title{Calculates the pseudo-ESS of Lanfear et al. (2015).
-Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the minimum or median over all possible reference trees at user's discretion.}
+\title{Calculates the pseudo-ESS of Lanfear et al. (2015).}
 \usage{
 pseudoESS(dmat, summary = c("min", "median"))
 }
@@ -13,7 +12,6 @@ pseudoESS(dmat, summary = c("min", "median"))
 \item{summary}{Should we return the minimum or the median?}
 }
 \description{
-Calculates the pseudo-ESS of Lanfear et al. (2015).
 Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the minimum or median over all possible reference trees at user's discretion.
 }
 \keyword{internal}

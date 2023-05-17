@@ -2,8 +2,7 @@
 % Please edit documentation in R/pseudoESS.R
 \name{minPseudoESS}
 \alias{minPseudoESS}
-\title{Calculates the pseudo-ESS of Lanfear et al. (2015).
-Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the minimum over all possible reference trees.}
+\title{Calculates the pseudo-ESS of Lanfear et al. (2015).}
 \usage{
 minPseudoESS(dmat, ...)
 }
@@ -11,7 +10,6 @@ minPseudoESS(dmat, ...)
 \item{dmat}{Sample-to-sample distance matrix for the MCMC chain.}
 }
 \description{
-Calculates the pseudo-ESS of Lanfear et al. (2015).
 Instead of calculating the pseudo-ESS 100 times and reporting summaries, returns the minimum over all possible reference trees.
 }
 \keyword{internal}

@@ -12,6 +12,7 @@ holmesTest(
   B = 1000,
   R = 1000,
   returnNullDistribution = FALSE,
+  block.bootstrap = FALSE,
   ...
 )
 

@@ -8,7 +8,9 @@
 #' @return The PSRF.
 #' @export
 #' @seealso \link{splitProbs}, \link{perTreeSplits}
-splitFrequencyPSRF <- function(trees,rooted=FALSE) {
+splitFrequencyPSRF <- function(trees,rooted=FALSE,use.lugsail=FALSE) {
+  # TODO: correctness needs checking
+  
   # Check for valid inputs
   if ( !("list" %in% class(trees)) ) {
     stop("Argument 'trees' must be a list.")
@@ -48,6 +50,63 @@ splitFrequencyPSRF <- function(trees,rooted=FALSE) {
   
   B_n <- 1/(nchains - 1) * grand_mean$ssq
   
+  if (use.lugsail) {
+    n <- chainlength
+    m <- nchains
+    
+    # b = batch size, a = # batches
+    b <- floor(n^(1/2))
+    a <- floor(n/b)
+    
+    # Global mean
+    mu <- grand_mean$mean
+    
+    per_chain_sum_squared_deviations <- sapply(1:nchains,function(i){
+      ybar <- lapply(1:a,function(k){
+        first <- (k-1)*b+1
+        last <- k*b
+        splitFrechetMean(splits[[i]][first:last])
+      })
+      
+      summand <- sapply(1:length(ybar),function(i){
+        key <- fastmatch::fmatch(names(ybar[[i]]),names(mu))
+        unseen_sum_sq <- sum(mu[-key]^2)
+        seen_sum_sq <- sum((ybar[[i]] - mu[key])^2)
+        return(seen_sum_sq + unseen_sum_sq)
+      })
+      
+      return(sum(summand))
+    })
+    
+    tau_sq_b <- b/(a*m-1) * sum(per_chain_sum_squared_deviations)
+    
+    # b = batch size, a = # batches
+    b <- floor(b/3)
+    a <- floor(n/b)
+    
+    per_chain_sum_squared_deviations <- sapply(1:nchains,function(i){
+      ybar <- lapply(1:a,function(k){
+        first <- (k-1)*b+1
+        last <- k*b
+        splitFrechetMean(splits[[i]][first:last])
+      })
+      
+      summand <- sapply(1:length(ybar),function(i){
+        key <- fastmatch::fmatch(names(ybar[[i]]),names(mu))
+        unseen_sum_sq <- sum(mu[-key]^2)
+        seen_sum_sq <- sum((ybar[[i]] - mu[key])^2)
+        return(seen_sum_sq + unseen_sum_sq)
+      })
+      return(sum(summand))
+    })
+    
+    tau_sq_b_3 <- b/(a*m-1) * sum(per_chain_sum_squared_deviations)
+    
+    tau_sq <- 2*tau_sq_b - tau_sq_b_3
+    
+    B_n <- tau_sq/n
+  }
+
   V <- (1 - 1/chainlength) * W + B_n
   
   psrf <- sqrt(V/W)

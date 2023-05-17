@@ -10,7 +10,7 @@ splitFrequencyESS(trees, ...)
 \item{trees}{All trees in the MCMC chain, either as trees or as RF coordinates.}
 }
 \description{
-Calculates ESS using a Frechet-like generalization of the univariate ESS of Vats and Knudson (2018).
+Internal matrix-based representation of trees not recommended for large trees.
 }
 \references{
 Vats and Knudson (2021). "Revisiting the Gelman-Rubin diagnostic." Statistical Science, 36(4), 518-529.
