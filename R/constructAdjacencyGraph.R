@@ -3,11 +3,12 @@
 #' @param trees A multiPhylo object or list of phylo objects
 #' @param weights The probabilities for each tree (need not sum to one)
 #' @param trim Should we trim to the largest connected subset of trees in the posterior?
+#' @param rooted Should we take the trees to be rooted, and thus construct the graph for rooted NNI moves.
 #' @return A list. $trees contains all topologies, $probs their probabilities, $NNI the NNI connectivity graph.
 #' @export
 #' @examples
 #' constructAdjacencyGraph(rmtree(100,5))
-constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALSE) {
+constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALSE,rooted=FALSE) {
   # recover()
   
   res <- list(trees=trees,probs=weights/sum(weights))
@@ -16,7 +17,7 @@ constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALS
   
   # The RF distance is in general a lower bound on the NNI distance
   # However, for the special case of 1 NNI move, an RF distance of 2 and an NNI distance of 1 are equivalent
-  dmat <- as.matrix(phangorn::RF.dist(trees))
+  dmat <- as.matrix(phangorn::RF.dist(trees,rooted=rooted))
   
   # Error checking
   if ( any(dmat %% 2 != 0) ) {
@@ -78,6 +79,8 @@ constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALS
   }
   
   class(res) <- "treeAdjacencyGraph"
+  
+  attr(res,"rooted") <- rooted
   
   return(res)
 }

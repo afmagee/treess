@@ -1,7 +1,7 @@
 test_that("Compare computed ESS values to cached values.", {
 
   # Get stored ESS values (all approaches, )
-  file <- system.file("extdata","precomputed_ess.csv",package="treess")
+  file <- system.file("testdata","precomputed_ess.csv",package="treess")
   precomputed <- as.matrix(read.csv(file,row.names=1))
 
   # Get MCMC chains, will load to be an object called ds.mcmc

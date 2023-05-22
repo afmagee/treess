@@ -4,7 +4,12 @@
 \alias{constructAdjacencyGraph}
 \title{Computes the NNI adjacency graph for a set of (unique) tree topologies.}
 \usage{
-constructAdjacencyGraph(trees, weights = rep(1, length(trees)), trim = FALSE)
+constructAdjacencyGraph(
+  trees,
+  weights = rep(1, length(trees)),
+  trim = FALSE,
+  rooted = FALSE
+)
 }
 \arguments{
 \item{trees}{A multiPhylo object or list of phylo objects}
@@ -12,6 +17,8 @@ constructAdjacencyGraph(trees, weights = rep(1, length(trees)), trim = FALSE)
 \item{weights}{The probabilities for each tree (need not sum to one)}
 
 \item{trim}{Should we trim to the largest connected subset of trees in the posterior?}
+
+\item{rooted}{Should we take the trees to be rooted, and thus construct the graph for rooted NNI moves.}
 }
 \value{
 A list. $trees contains all topologies, $probs their probabilities, $NNI the NNI connectivity graph.
