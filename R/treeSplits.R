@@ -73,7 +73,6 @@ perTreeSplits <- function(trees,rooted=FALSE,ref=NULL) {
 #'
 #' @param tree.splits output of perTreeSplits.
 #' @param range optional argument to define which trees to compute probabilities for, defaults to all trees.
-#' @param return.names should we return the taxa names?
 #' @return Named vector of split (or clade) probabilities.
 #' @export
 #' @seealso \link{perTreeSplits}
@@ -184,6 +183,25 @@ perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,
   
 }
 
+#' Split Frechet variance from collections of splits which came from tree samples with uneven lengths.
+#' 
+#' For tree samples of even length, the unweighted mean is faster and should be used.
+#'
+#' @param split.prob.list List of outputs of perTreeSplits.
+#' @param w Weights (e.g., lengths of each set of trees)
+#' @return Named vector of split (or clade) probabilities.
+#' @keywords internal
+weightedSplitFrechetMean <- function(split.prob.list,w) {
+  all_split_names <- unique(names(unlist(split.prob.list)))
+  all_splits <- numeric(length(all_split_names))
+  for (i in 1:length(split.prob.list)) {
+    key <- fastmatch::fmatch(names(split.prob.list[[i]]),all_split_names)
+    all_splits[key] <- all_splits[key] + split.prob.list[[i]] * w[i]
+  }
+  names(all_splits) <- all_split_names
+  return(all_splits/sum(w))
+}
+
 # splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
 #   # recover()
 #   m <- 0
@@ -222,20 +240,6 @@ perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,
 #   
 # }
 
-# # Not nearly as efficient as the unweighted mean!
-# # Here mainly for completeness
-# weightedSplitFrechetMean <- function(tree.split.probs) {
-#   all_split_names <- unique(names(unlist(tree.split.probs)))
-#   all_splits <- numeric(length(all_split_names))
-#   for (i in 1:length(tree.split.probs)) {
-#     key <- match(names(tree.split.probs[[i]]),all_split_names)
-#     all_splits[key] <- all_splits[key] + tree.split.probs[[i]]
-#   }
-#   names(all_splits) <- all_split_names
-#   return(all_splits/length(tree.split.probs))
-# }
-
- 
 # weightedSplitFrechetVariance <- function(tree.split.probs,mean=NULL,bessel=TRUE) {
 #   recover()
 #   m <- 0
