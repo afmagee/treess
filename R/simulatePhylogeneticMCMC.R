@@ -31,7 +31,7 @@ simulatePhylogeneticMCMC <- function(adjacency.graph,ngen=1000,nchains=100,thin=
   n_tips <- length(adjacency.graph$trees[[1]]$tip.label)
   
   n_nni_neighbors <- 2*(n_tips-3)
-  if ( attr(res,"rooted") == TRUE ) {
+  if ( attr(adjacency.graph,"rooted") == TRUE ) {
     n_nni_neighbors <- 2*(n_tips-2)
   }
 
