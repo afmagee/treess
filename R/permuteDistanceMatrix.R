@@ -14,15 +14,5 @@ permuteDistanceMatrix <- function(dmat,bootstrap=FALSE) {
   
   new_indices <- sample.int(n,n,replace=bootstrap)
   
-  # Can we not just replace this with dmat[new_indices,new_indices]?
-  # That would also allow this to be more generally used as permuteMatrix
-  tmp <- matrix(0,n,n)
-  for (i in 1:(n-1)) {
-    for (j in (i+1):n) {
-      tmp[j,i] <- tmp[i,j] <- dmat[new_indices[i],new_indices[j]]
-    }
-    
-  }
-
-  return(tmp)
+  return(dmat[new_indices,new_indices])
 }
