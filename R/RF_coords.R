@@ -2,18 +2,53 @@
 #'
 #' Transforms sample of trees into their coordinates in (reduced) RF space. Reduction is to the set of coordinates (splits/bipartitions) seen in at least one tree.
 #'
-#' @param trees list of trees or multiPhylo object
+#' @param trees list of trees, a multiPhylo object, or a perTreeSplits object
 #' @return Output: a list. $coords is a matrix of trees as coordinates (see details), and $taxa is a list of taxa in each split in the matrix (ordered 1:n).
 #' @details In the output$coords, every row is a tree, every column the presence/absence of a split.
 #' @export
 as.RFcoords <- function(trees) {
-  splits <- trees2Coords(trees,namesplits=TRUE)
+  splits <- NULL
+  if ( class(trees) == "perTreeSplits" ) {
+    splits <- perTreeSplits2RFcoords(trees)
+  } else if ( class(trees) == "multiPhylo" || (class(trees) == "list" && all(sapply(trees,class) == "phylo")) ) {
+    splits <- trees2Coords(trees,namesplits=TRUE)
+  } else {
+    stop("Input must be either trees or perTreeSplits.")
+  }
   split_taxa <- colnames(splits)
   split_taxa <- lapply(1:dim(splits)[2],function(i){
     strsplit(split_taxa[i],";")[[1]]
   })
   colnames(splits) <- NULL
   return(list(coords=splits,taxa=split_taxa))
+}
+
+#' Trees as vectors of splits.
+#'
+#' Transforms perTreeSplits list into RF coordinate matrix.
+#'
+#' @param splits perTreeSplits object
+#' @return Output: a list. $coords is a matrix of trees as coordinates (see details), and $taxa is a list of taxa in each split in the matrix (ordered 1:n).
+#' @details In the output$coords, every row is a tree, every column the presence/absence of a split.
+#' @keywords internal
+perTreeSplits2RFcoords <- function(splits) {
+  # recover()
+  
+  all_splits <- names(splitFrechetMean(splits))
+  nsplits <- length(all_splits)
+  coords <- t(sapply(splits,function(split){
+    split <- unclass(split)
+    bitsplit <- rep(0,nsplits)
+    bitsplit[match(split,all_splits)] <- 1
+    return(bitsplit)
+  }))
+  taxa <- attr(splits,"labels")
+  split_names <- sapply(all_splits,function(split){
+    taxon_indices <- as.integer(strsplit(split,",")[[1]])
+    paste0(sort(taxa[taxon_indices]),collapse=";")
+  })
+  colnames(coords) <- split_names
+  return(coords)
 }
 
 #' Tree distance
@@ -60,6 +95,7 @@ trees2Coords <- function(trees,namesplits=FALSE) {
   all_splits <- all_splits[!trivial,]
   
   # Collapse to strings
+  # TODO use "," like perTreeSplits
   split_names <- c()
   if ( namesplits ) {
     taxa <- colnames(all_splits)
