@@ -5,11 +5,11 @@
 #'
 #' @param trees list of trees or multiPhylo object
 #' @param rooted For rooted trees, if rooted=TRUE, clades are considered rather than splits. Otherwise trees are treated as unrooted.
-#' @param ref Advanced option. Allows access to ref argument of \link{ape::.compressTipLabel}, so as to make splits/clades comparable across calls to different sets of trees on the same taxa.
+#' @param ref Advanced option. Allows access to ref argument of \link{ape::.compressTipLabel}. Default ensures splits/clades are comparable across calls to different sets of trees on the same taxa, and should only be changed with care!
 #' @return Output an object of class perTreeSplits (a list of splits in each tree with attributes for the taxon labels and whether the tree is considered rooted or not).
 #' @export
 #' @seealso \link{splitProbs}, \link{nSplits}, \link{ape::prop.part}
-perTreeSplits <- function(trees,rooted=FALSE,ref=NULL) {
+perTreeSplits <- function(trees,rooted=FALSE,ref=sort(trees[[1]]$tip.label)) {
   # recover()
   
   # We use rooted later assuming it behaves as 0 for FALSE, 1 for TRUE, so we check this now
@@ -32,7 +32,7 @@ perTreeSplits <- function(trees,rooted=FALSE,ref=NULL) {
   # Rooted trees being analyzed for splits are re-rooted the same way
   class(trees) <- "multiPhylo"
   if ( !rooted ) {
-    trees <- ape::root(ape::unroot(trees),taxa[1],resolve.root=TRUE)
+    trees <- ape::root.multiPhylo(ape::unroot.multiPhylo(trees),taxa[1],resolve.root=TRUE)
     # trees <- lapply(trees,function(phy){
     #   ape::root(ape::unroot(phy),taxa[1],resolve.root=TRUE)
     # })
@@ -105,6 +105,8 @@ nSplits <- function(tree.splits) {
 #' @keywords internal
 #' @seealso \link{splitProbs}, \link{perTreeSplits}
 splitFrechetMean <- function(tree.splits) {
+  # TODO: in some cases, nTrees * nCladesPerTree will be too large to handle, but the number of unique splits will not be
+  # A fallback to handle this could be useful
   all_splits <- unlist(unclass(tree.splits))
   names(all_splits) <- NULL
   tab <- table(all_splits)

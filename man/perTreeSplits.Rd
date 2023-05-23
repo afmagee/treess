@@ -4,14 +4,14 @@
 \alias{perTreeSplits}
 \title{Trees as collections of splits.}
 \usage{
-perTreeSplits(trees, rooted = FALSE, ref = NULL)
+perTreeSplits(trees, rooted = FALSE, ref = sort(trees[[1]]$tip.label))
 }
 \arguments{
 \item{trees}{list of trees or multiPhylo object}
 
 \item{rooted}{For rooted trees, if rooted=TRUE, clades are considered rather than splits. Otherwise trees are treated as unrooted.}
 
-\item{ref}{Advanced option. Allows access to ref argument of \link{ape::.compressTipLabel}, so as to make splits/clades comparable across calls to different sets of trees on the same taxa.}
+\item{ref}{Advanced option. Allows access to ref argument of \link{ape::.compressTipLabel}. Default ensures splits/clades are comparable across calls to different sets of trees on the same taxa, and should only be changed with care!}
 }
 \value{
 Output an object of class perTreeSplits (a list of splits in each tree with attributes for the taxon labels and whether the tree is considered rooted or not).
