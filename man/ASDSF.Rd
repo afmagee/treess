@@ -7,7 +7,7 @@
 ASDSF(x, min.freq = 0.01, summary.fn = mean, weights = "equal")
 }
 \arguments{
-\item{x}{A list. Either a list of multiPhylo objects or a list of split probability vectors.}
+\item{x}{A list. Either a list of multiPhylo objects, a list of perTreeSplit objects, or a list of split probability vectors.}
 
 \item{min.freq}{Splits less than this frequency (on average) will not be included.}
 
