@@ -11,6 +11,15 @@
 constructAdjacencyGraph <- function(trees,weights=rep(1,length(trees)),trim=FALSE,rooted=FALSE) {
   # recover()
   
+  trees_rooted <- sapply(trees,ape::is.rooted.phylo)
+  if ( length(unique(trees_rooted)) > 1 ) {
+    stop("Trees are mix of rooted and unrooted.")
+  }
+  
+  if ( rooted != trees_rooted[1] ) {
+    stop("Rooting mismatch between trees and argument \"rooted\".")
+  }
+  
   res <- list(trees=trees,probs=weights/sum(weights))
   
   n <- length(trees)

@@ -91,6 +91,7 @@ simulatePhylogeneticMCMC <- function(adjacency.graph,ngen=1000,nchains=100,thin=
   mcmc <- mcmc[seq(1,ngen,thin),]
   
   res <- list(trees=adjacency.graph$trees,probs=adjacency.graph$probs,indices=mcmc)
+  attr(res,"rooted") <- attr(adjacency.graph,"rooted")
   class(res) <- "simulatedPosterior"
   
   return(res)
