@@ -58,7 +58,9 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   }
   
   # Add the topologies as RF coordinates (allows us to reduce compute time)
-  simulated.samples$coords <- trees2Coords(simulated.samples$trees)
+  # simulated.samples$coords <- trees2Coords(simulated.samples$trees)
+  simulated.samples$coords <- perTreeSplits2RFcoords(perTreeSplits(simulated.samples$trees))
+  colnames(simulated.samples$coords) <- NULL
   
   # get ESS for every method for every chain
   if ( verbose ) {
