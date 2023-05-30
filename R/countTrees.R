@@ -37,7 +37,7 @@ countTreesRecursive <- function(trees,indices,unique.indices,counts,idx,rooted=F
   unique_indices <- unique.indices
   idx <- idx + 1
   
-  dists <- suppressWarnings(phangorn::RF.dist(trees[indices],trees[[indices[1]]]))
+  dists <- suppressWarnings(phangorn::RF.dist(trees[indices],trees[[indices[1]]],rooted=rooted))
   
   tab <- table(dists)
   
