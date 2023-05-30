@@ -12,7 +12,7 @@ areMatricesEquivalentWithReordering <- function(x,y,tolerance=testthat::testthat
     foundThis <- FALSE
     m <- dim(y)[1]
     for (j in 1:m) {
-      if (all.equal(x[1,],y[j,],tolerance=tolerance)) {
+      if ( all.equal(x[1,],y[j,],tolerance=tolerance) == TRUE ) {
         foundThis <- TRUE
         where <- j
         break
