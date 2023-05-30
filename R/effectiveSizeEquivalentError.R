@@ -49,12 +49,12 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   
   # Start with the distance matrix for all unique topologies (allows us to reduce compute time)
   dmat <- matrix(nrow=ntrees,ncol=ntrees)
-  if ( tolower(tree.dist) == "rf" ) {
+  if ( is.function(tree.dist) ) {
+    dmat <- as.matrix(tree.dist(simulated.samples$trees))
+  } else if ( tolower(tree.dist) == "rf" ) {
     dmat <- as.matrix(phangorn::RF.dist(simulated.samples$trees))
   } else if ( tolower(tree.dist) == "spr" ) {
     dmat <- as.matrix(phangorn::SPR.dist(simulated.samples$trees))
-  } else if ( is.function(tree.dist) ) {
-    dmat <- as.matrix(tree.dist(simulated.samples$trees))
   } else {
     stop("Invalid input for argument 'tree.dist'")
   }
