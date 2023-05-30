@@ -21,7 +21,7 @@ effectiveSizeEquivalentError(
 \arguments{
 \item{simulated.samples}{An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).}
 
-\item{tree.dist}{The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).}
+\item{tree.dist}{The distance measure for trees, only used for ESS computations. "RF" and "SPR" are shortcuts for the unrooted RF and SPR distances. May also pass in a function which can be called on a multiPhylo object and return an object of class "dist".}
 
 \item{measures}{The error or variance measure(s) (see details).}
 

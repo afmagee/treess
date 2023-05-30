@@ -4,7 +4,7 @@
 #' Then it computes a variety of summary measures useful for determining whether or not the ESS method works.
 #' 
 #' @param simulated.samples An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).
-#' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
+#' @param tree.dist The distance measure for trees, only used for ESS computations. "RF" and "SPR" are shortcuts for the unrooted RF and SPR distances. May also pass in a function which can be called on a multiPhylo object and return an object of class "dist".
 #' @param measures The error or variance measure(s) (see details).
 #' @param ess.methods The ESS calculation method(s). Defaults to all available methods. Will also always evaluate the ESS of the log-posterior.
 #' @param observed.trees.only If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.
@@ -53,13 +53,15 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
     dmat <- as.matrix(phangorn::RF.dist(simulated.samples$trees))
   } else if ( tolower(tree.dist) == "spr" ) {
     dmat <- as.matrix(phangorn::SPR.dist(simulated.samples$trees))
+  } else if ( is.function(tree.dist) ) {
+    dmat <- as.matrix(tree.dist(simulated.samples$trees))
   } else {
     stop("Invalid input for argument 'tree.dist'")
   }
   
   # Add the topologies as RF coordinates (allows us to reduce compute time)
   # simulated.samples$coords <- trees2Coords(simulated.samples$trees)
-  simulated.samples$coords <- perTreeSplits2RFcoords(perTreeSplits(simulated.samples$trees))
+  simulated.samples$coords <- perTreeSplits2RFcoords(perTreeSplits(simulated.samples$trees,rooted=attr(simulated.samples,"rooted")))
   colnames(simulated.samples$coords) <- NULL
   
   # get ESS for every method for every chain
