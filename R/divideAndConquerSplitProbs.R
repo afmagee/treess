@@ -10,6 +10,7 @@
 #' @param cutoff Minimum split probability target. See details.
 #' @param alpha Modifies target threshold from cutoff using a one-sided confidence interval with width alpha. Set to NULL if undesired. See details.
 #' @param second.pass Gets correct probabilities for all splits identified at cost of extra computation. See details.
+#' @return Named vector of split (or clade) probabilities.
 #' @details 
 #' The function operates on many batches of size sqrt(length(tree.splits)) to make the problem of identifying splits with probability >= cutoff easier.
 #' 
@@ -23,7 +24,6 @@
 #' The thoroughness of the search for the set of splits depends on the actual threshold used, which is a function of alpha and the cutoff.
 #' Specifically, during the first pass the threshold is either cutoff (if alpha == NULL) or the alpha x 100\% confidence interval for proportion = cutoff with sample size sqrt(n).
 #' The smaller alpha is, the more splits which will be retained.
-#' @return Named vector of split (or clade) probabilities.
 #' @export
 #' @seealso \link{splitProbs}, \link{binomialProportionCI}
 divideAndConquerSplitProbs <- function(tree.splits,range=NULL,cutoff=0.1,alpha=0.05,second.pass=TRUE) {
