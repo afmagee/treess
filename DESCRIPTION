@@ -11,4 +11,4 @@ Description: Effective sample size measures and convergence tests for phylogenet
 License: GPL-3
 Suggests: knitr, igraph, DescTools, rmutil, testthat
 VignetteBuilder: knitr
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

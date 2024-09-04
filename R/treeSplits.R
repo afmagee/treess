@@ -151,11 +151,12 @@ splitFrechetVariance <- function(tree.splits,mean=NULL,bessel=TRUE) {
 #' Assumes equal weighting!
 #'
 #' @param mean.list list of output of \link{splitFrechetMean} or \link{splitProbs}.
-#' @return List with grand mean ($mean), and optionally sum of squared deviations to the grand mean ($ssq) 
-#' and optionally the standard deviations of all split frequencies.
+#' @return List with grand mean ($mean), and optionally sum of squared deviations to the grand mean ($ssq), 
+#' the standard deviations of all split frequencies ($sdsf), partial components for a G test of split
+#' probabilities (but without the factor of n, $g.comp), and the aligned matrix of probabilities in all chains ($mat).
 #' @keywords internal
 #' @seealso \link{splitProbs}, \link{perTreeSplits}
-perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,return.sdsf=FALSE) {
+perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,return.sdsf=FALSE,return.gcomp=FALSE,return.mat=FALSE) {
   # recover()
   
   all_split_names <- unique(unlist(lapply(mean.list,names)))
@@ -179,6 +180,21 @@ perTreeSplitsConvergenceHelper <- function(mean.list,weights=1,return.ssq=FALSE,
   if (return.sdsf) {
     sdsf <- apply(mat,2,sd)
     res$sdsf <- sdsf
+  }
+  
+  if (return.gcomp) {
+    f <- t(mat)
+    suppressWarnings({plus <- f * log(f / m)})
+    # 0 * log(0) is 0 for this purpose
+    plus[is.nan(plus)] <- 0
+    f <- 1 - f
+    suppressWarnings({minus <- f * log(f / (1 - m))})
+    minus[is.nan(minus)] <- 0
+    res$gcomp <- 2 * (rowSums(plus) + rowSums(minus))
+  }
+  
+  if (return.mat) {
+    res$mat <- mat
   }
   
   return(res)

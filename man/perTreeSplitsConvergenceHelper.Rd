@@ -8,15 +8,18 @@ perTreeSplitsConvergenceHelper(
   mean.list,
   weights = 1,
   return.ssq = FALSE,
-  return.sdsf = FALSE
+  return.sdsf = FALSE,
+  return.gcomp = FALSE,
+  return.mat = FALSE
 )
 }
 \arguments{
 \item{mean.list}{list of output of \link{splitFrechetMean} or \link{splitProbs}.}
 }
 \value{
-List with grand mean ($mean), and optionally sum of squared deviations to the grand mean ($ssq) 
-and optionally the standard deviations of all split frequencies.
+List with grand mean ($mean), and optionally sum of squared deviations to the grand mean ($ssq), 
+the standard deviations of all split frequencies ($sdsf), partial components for a G test of split
+probabilities (but without the factor of n, $g.comp), and the aligned matrix of probabilities in all chains ($mat).
 }
 \description{
 Computes the grand mean from a collection of split Frechet means.
