@@ -4,7 +4,7 @@
 #' Then it computes a variety of summary measures useful for determining whether or not the ESS method works.
 #' 
 #' @param simulated.samples An object of class simulatedPosterior (output of \link{simulatePhylogeneticMCMC}).
-#' @param tree.dist The distance measure for trees, only used for ESS computations (RF or SPR, use only one, default RF).
+#' @param tree.dist The distance measure for trees, only used for ESS computations ("RF", "SPR", or a valid distance function as in \link[treess]{treess}).
 #' @param measures The error or variance measure(s) (see details).
 #' @param ess.methods The ESS calculation method(s). Defaults to all available methods. Will also always evaluate the ESS of the log-posterior.
 #' @param observed.trees.only If TRUE, restricts the drawing of iid trees to only draw from the portion of the posterior seen in the MCMC chains. Otherwise can draw any tree in the posterior.
@@ -49,10 +49,16 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   
   # Start with the distance matrix for all unique topologies (allows us to reduce compute time)
   dmat <- matrix(nrow=ntrees,ncol=ntrees)
-  if ( tolower(tree.dist) == "rf" ) {
+  if ( is.character(tree.dist) && tolower(tree.dist) == "rf" ) {
     dmat <- as.matrix(phangorn::RF.dist(simulated.samples$trees))
-  } else if ( tolower(tree.dist) == "spr" ) {
+  } else if ( is.character(tree.dist) && tolower(tree.dist) == "spr" ) {
     dmat <- as.matrix(phangorn::SPR.dist(simulated.samples$trees))
+  } else if ( "function" %in% class(dist) ) {
+    dists <- tree.dist(simulated.samples$trees)
+    if ( !("dist" %in% class(dists)) ) {
+      stop("If providing a function, tree.dist must return object of class dist.")
+    }
+    dmat <- as.matrix(dists)
   } else {
     stop("Invalid input for argument 'tree.dist'")
   }
