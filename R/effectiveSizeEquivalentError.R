@@ -103,13 +103,22 @@ effectiveSizeEquivalentError <- function(simulated.samples,tree.dist="RF",measur
   if ( verbose ) {
     cat("\nDrawing n_eff iid samples for all measures and all chains\n")
   }
-  iid_n_samples_max <- round(max(all_ess))
+  if (any(!is.finite(all_ess))) {
+    warning("Infinite values in ",
+            paste(colnames(all_ess)[colSums(!is.finite(all_ess)) > 0],
+                  collapse = ", "),
+            " replaced with NA",
+            immediate. = TRUE
+    )
+    all_ess[!is.finite(all_ess)] <- NA
+  }
+  iid_n_samples_max <- round(max(all_ess,na.rm=TRUE))
   iid_samples <- lapply(ess.methods,function(this_method) {
     these_ess <- round(all_ess[,colnames(all_ess) == this_method])
     iid <- simulated.samples
     drawn_indices <- lapply(these_ess,function(n_eff){
       # Some ESS may be in [0,1], but we can't compute any measures without trees
-      n_eff <- max(1,n_eff)
+      n_eff <- max(1,n_eff,na.rm=TRUE)
       drawn <- sample.int(ntrees,n_eff,replace=TRUE,prob=topo_probs)
       if (n_eff < iid_n_samples_max) {
         drawn <- c(drawn,rep(NA,iid_n_samples_max - n_eff))
